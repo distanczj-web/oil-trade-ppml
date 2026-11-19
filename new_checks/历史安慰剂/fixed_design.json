@@ -1,0 +1,39 @@
+{
+  "fixed_before_any_new_model": true,
+  "created": "2026-10-28T15:27:01.028233+00:00",
+  "cases": [
+    {
+      "name": "PL2015",
+      "political_start": 2010,
+      "political_end": 2014,
+      "shock": 2015,
+      "trade_start": 2000,
+      "trade_end": 2019
+    },
+    {
+      "name": "PL2017",
+      "political_start": 2012,
+      "political_end": 2016,
+      "shock": 2017,
+      "trade_start": 2000,
+      "trade_end": 2021
+    }
+  ],
+  "regressors": [
+    "meanpd5_post",
+    "pri5_post",
+    "trendpd5_post",
+    "distance_post2022"
+  ],
+  "fe": [
+    "pair_id",
+    "ex_year",
+    "im_year"
+  ],
+  "cluster": "directed_pair",
+  "interpretation": "Historical timing falsification; five post years; no 2022+ trade; not a causal test. No significance-based window selection.",
+  "input_sha256": {
+    "C:\\Users\\1\\Desktop\\查健 PPML小论文\\01_回归数据\\扩展检验母样本_2000至2024.dta": "719ed246bf472bc78f946cc81f7bdb9006392b06b64fcec2416b387c69a1f722",
+    "C:\\Users\\1\\Desktop\\查健 PPML小论文\\02_原始数据\\UNGA_年度理想点_2026FP.csv": "3ae821bbd19977d4229cde5ac648e4bc915d637ec0dcf93368838cf5bde2a956"
+  }
+}

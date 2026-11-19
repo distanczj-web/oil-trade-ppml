@@ -1,0 +1,7 @@
+数据来源及冻结口径
+
+UN Comtrade，HS270900，2000–2024 年双边原油贸易。金额取进口方申报，净重用于实物量比较，出口方镜像另作核对。论文 3.1 与附录 A1、A5、A8 说明口径。https://comtradeplus.un.org/
+联合国大会理想点，Harvard Dataverse，版本 39 中冻结的年度 final-passage CSV。附录 A2 和 A7 说明版本、两端覆盖及计数比较。https://doi.org/10.7910/DVN/LEJUQZ
+UNGA-DM，2023.2 版，按最终通过投票构造共同投票分歧指标。https://unvotes.unige.ch/
+联合国数字图书馆投票记录，附录 A7 的外部计数对照来源。https://digitallibrary.un.org/record/4060887
+CEPII GeoDist，地理距离与双边地理协变量。https://www.cepii.fr/CEPII/en/publications/wp/abstract.asp?NoDoc=3877

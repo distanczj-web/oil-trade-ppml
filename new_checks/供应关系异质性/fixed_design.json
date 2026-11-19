@@ -1,0 +1,21 @@
+{
+  "window": [
+    2017,
+    2018,
+    2019
+  ],
+  "denominator": "All frozen-mother import partner amounts for each importer, summed over 2017-2019",
+  "missing_reporter_years": "Require all three importer-years present",
+  "outcome": "Import value USD",
+  "terms": [
+    "meanpd5_post",
+    "pri5_post",
+    "trendpd5_post",
+    "distance_post2022",
+    "dependence_post",
+    "trend_dependence_post"
+  ],
+  "fe": "pair_id ex_year im_year",
+  "one_specification_only": true,
+  "interpretation": "Heterogeneous conditional association, not a mechanism test"
+}

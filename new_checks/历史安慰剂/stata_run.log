@@ -1,0 +1,883 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks\历史安慰剂/stata
+> _run.log
+  log type:  text
+ opened on:   5 Nov 2026, 23:27:56
+
+. local pack "."
+
+. sysdir set PLUS `"`root'/`pack'/ado/"'
+
+. adopath ++ `"`root'/`pack'/ado"'
+  [1]              "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网
+> 络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks/./ado"
+  [2]  (BASE)      "D:\Stata\ado\base/"
+  [3]  (SITE)      "D:\Stata\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\1\ado\personal/"
+  [6]  (PLUS)      "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网
+> 络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks/./ado/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. ppmlhdfe, version
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks/./ado\ppmlhdfe.ado
+*! version 2.3.4 11jan2025
+*! Authors: Sergio Correia, Paulo Guimarães, Thomas Zylkin
+*! URL: https://github.com/sergiocorreia/ppmlhdfe
+
+Required packages installed?
+- ftools   yes; version: 2.50.0 09jan2026
+- reghdfe  yes; version: 6.14.1 08Jul2026
+
+. do "code/oil_local_core.do"
+
+. * PRIVATE DERIVATIVE 2026-10-22: extra local-margin stopping criterion only.
+. * Independent Stata/Mata implementation. This is NOT the official ppmlhdfe.
+. * Exact pair-block elimination, normal-equation CG, full-predictor line searc
+> h.
+. * No Python estimates, fitted values, penalties, or altered outcomes are inpu
+> ts.
+. mata:
+------------------------------------------------- mata (type end to exit) -----
+: mata set matastrict on
+
+: mata set matalnum on
+
+: class OilSystem {
+>     real colvector p,e,i,t,op,oe,oi,mu,root,s0,tc,sv,scale
+>     real matrix ip,ie,ii,x
+>     real rowvector xs
+>     real scalar np,ne,ni,n,total,trend,withx,last_iter,last_error
+>     void setup()
+>     real matrix gs()
+>     void weights()
+>     real colvector pair_project()
+>     real colvector pair_residual()
+>     real colvector z()
+>     real colvector matvec()
+>     real colvector rmatvec()
+>     real colvector normal()
+>     real colvector solve_score()
+>     real scalar score()
+> }
+
+: real matrix OilSystem::gs(real matrix v, real scalar which)
+> {
+>     if (which==1) return(panelsum(v[op,.],ip))
+>     if (which==2) return(panelsum(v[oe,.],ie))
+>     return(panelsum(v[oi,.],ii))
+> }
+
+: void OilSystem::setup(real scalar hastrend)
+> {
+>     p=st_data(. ,"__op_p");e=st_data(. ,"__op_e");i=st_data(. ,"__op_i")
+>     t=(st_data(. ,"year"):-2012)/12
+>     x=st_data(. ,tokens("meanpd5_post pri5_post trendpd5_post distance_post20
+> 22"))
+>     n=rows(p);np=max(p);ne=max(e);ni=max(i);trend=hastrend;withx=1
+>     op=order(p,1);oe=order(e,1);oi=order(i,1)
+>     ip=panelsetup(p[op],1);ie=panelsetup(e[oe],1);ii=panelsetup(i[oi],1)
+>     xs=sqrt(quadcolsum((x:-mean(x)):^2)/n)
+>     assert(min(xs)>0);x=x:/xs
+> }
+
+: void OilSystem::weights(real colvector w)
+> {
+>     real colvector anchor,ids,idx,dt,mt,nn
+>     real scalar g,j
+>     mu=w;root=sqrt(mu);s0=gs(mu,1)
+>     assert(min(s0)>0)
+>     anchor=J(np,1,.)
+>     for (g=1;g<=np;g++) {
+>         ids=op[|ip[g,1]\ip[g,2]|]
+>         idx=selectindex(mu[ids]:==max(mu[ids]));j=idx[1]
+>         anchor[g]=t[ids[j]]
+>     }
+>     dt=t-anchor[p];mt=gs(mu:*dt,1):/s0;tc=dt-mt[p]
+>     sv=gs(mu:*tc:^2,1);sv=rowmax((sv,J(np,1,1e-290)))
+>     nn=gs(mu,2)\gs(mu,3)
+>     if (withx) nn=nn\quadcolsum(mu:*x:^2)'
+>     scale=1:/sqrt(rowmax((nn,J(rows(nn),1,1e-290))))
+> }
+
+: real colvector OilSystem::pair_project(real colvector v)
+> {
+>     real colvector a,b,out
+>     a=gs(root:*v,1):/s0;out=v-root:*a[p]
+>     if (trend) {
+>         b=gs(root:*tc:*v,1):/sv
+>         out=out-root:*tc:*b[p]
+>     }
+>     return(out)
+> }
+
+: real colvector OilSystem::pair_residual(real colvector v)
+> {
+>     real colvector a,b,out
+>     a=gs(mu:*v,1):/s0;out=v-a[p]
+>     if (trend) {
+>         b=gs(mu:*tc:*v,1):/sv
+>         out=out-tc:*b[p]
+>     }
+>     return(out)
+> }
+
+: real colvector OilSystem::z(real colvector c)
+> {
+>     real colvector out
+>     out=c[e]+c[ne:+i]
+>     if (withx) out=out+x*c[|ne+ni+1\ne+ni+4|]
+>     return(out)
+> }
+
+: real colvector OilSystem::matvec(real colvector c)
+> {
+>     return(pair_project(root:*z(c:*scale)))
+> }
+
+: real colvector OilSystem::rmatvec(real colvector v)
+> {
+>     real colvector w,out
+>     w=root:*pair_project(v);out=gs(w,2)\gs(w,3)
+>     if (withx) out=out\quadcross(x,w)
+>     return(out:*scale)
+> }
+
+: real colvector OilSystem::normal(real colvector c)
+> {
+>     return(rmatvec(matvec(c)))
+> }
+
+: real colvector OilSystem::solve_score(real colvector resid,real scalar tol)
+> {
+>     real colvector a,b,rr,g,q,r,d,ad
+>     real scalar rho,newrho,den,alpha,k,target
+>     a=gs(resid,1):/s0;rr=resid-mu:*a[p]
+>     if (trend) {
+>         b=gs(resid:*tc,1):/sv
+>         rr=rr-mu:*tc:*b[p]
+>     }
+>     g=gs(rr,2)\gs(rr,3)
+>     if (withx) g=g\quadcross(x,rr)
+>     g=g:*scale
+>     q=J(rows(g),1,0);r=g;d=r;rho=quadcross(r,r)
+>     target=max((1e-14,tol*sqrt(rho)))
+>     last_iter=0
+>     if (sqrt(rho)<=target) {
+>         last_error=sqrt(rho)
+>         return(q)
+>     }
+>     for (k=1;k<=14000;k++) {
+>         ad=normal(d);den=quadcross(d,ad)
+>         if (den<=0 | missing(den)) {
+>             last_error=sqrt(quadcross(g-normal(q),g-normal(q)))
+>             printf("CG_NONPOSITIVE k=%g residual=%g\n",k,last_error)
+>             _error(430)
+>         }
+>         alpha=rho/den;q=q+alpha*d;r=r-alpha*ad
+>         newrho=quadcross(r,r);last_iter=k
+>         if (sqrt(newrho)<=target) break
+>         d=r+(newrho/rho)*d;rho=newrho
+>     }
+>     last_error=sqrt(quadcross(g-normal(q),g-normal(q)))
+>     if (k>14000) {
+>         printf("CG_ITERATION_LIMIT residual=%g\n",last_error)
+>         _error(430)
+>     }
+>     return(q:*scale)
+> }
+
+: real scalar OilSystem::score(real colvector resid)
+> {
+>     real scalar err
+>     err=max(abs(gs(resid,1)\gs(resid,2)\gs(resid,3)\quadcross(x,resid)))
+>     if (trend) err=max((err,max(abs(gs(resid:*t,1)))))
+>     return(err/total)
+> }
+
+: real scalar oil_objective(real colvector eta,real colvector y)
+> {
+>     if (hasmissing(eta) | max(eta)>700) return(.)
+>     return(quadsum(exp(eta)-y:*eta))
+> }
+
+: void oil_fit(real scalar hastrend,real scalar maxiter,string scalar iterfile)
+> {
+>     class OilSystem scalar S
+>     real colvector y,eta,mu,beta,c,other,resid,a,b,step,trial,coef,se
+>     real matrix xr,H,Hi,clusters,V,results
+>     real scalar it,j,alpha,gd,old,newval,err,db,bt,converged,orth,sp_orth,f,l
+> ocalerr
+>     real colvector margin_p,margin_e,margin_i
+>     S=OilSystem();S.setup(hastrend)
+>     y=st_data(. ,"tradevalue")/1e9;S.total=quadsum(y)
+>     beta=J(4,1,0)
+>     eta=ln((S.gs(y,1):/S.gs(J(S.n,1,1),1))[S.p])
+>     margin_p=S.gs(y,1);margin_e=S.gs(y,2);margin_i=S.gs(y,3)
+>     assert(min(margin_p)>0 & min(margin_e)>0 & min(margin_i)>0)
+>     converged=0
+>     f=fopen(iterfile,"w")
+>     fput(f,"iteration,objective,step_fraction,score_relative,max_beta_step,CG
+> _iterations,CG_residual,min_eta,max_eta,local_margin_relative_error")
+>     printf("COLD_START_MATA N=%g pairs=%g trend=%g\n",S.n,S.np,hastrend)
+>     for (it=1;it<=maxiter;it++) {
+>         mu=exp(eta);S.weights(mu)
+>         c=S.solve_score(y-mu,2e-11);other=S.z(c)
+>         resid=y-mu-mu:*other
+>         a=S.gs(resid,1):/S.s0;step=other+a[S.p]
+>         if (hastrend) {
+>             b=S.gs(resid:*S.tc,1):/S.sv
+>             step=step+S.tc:*b[S.p]
+>         }
+>         old=oil_objective(eta,y);gd=quadcross(mu-y,step)
+>         assert(gd<=1e-9*S.total)
+>         alpha=min((1,30/max((30,max(abs(step))))))
+>         for (bt=0;bt<70;bt++) {
+>             trial=eta+alpha*step;newval=oil_objective(trial,y)
+>             if (!missing(newval) & newval<=old+1e-4*alpha*gd+2e-12*S.total) b
+> reak
+>             alpha=alpha/2
+>         }
+>         if (bt>=70) {
+>             fclose(f)
+>             _error(430)
+>         }
+>         eta=trial;beta=beta+alpha*c[|S.ne+S.ni+1\S.ne+S.ni+4|]
+>         err=S.score(y-exp(eta));db=max(abs(alpha*c[|S.ne+S.ni+1\S.ne+S.ni+4|]
+> :/(S.xs')))
+>         printf("MATA_ITER %g obj=%21.13g alpha=%g score=%g beta_step=%g CG=%g
+>  mineta=%g btrend=%g\n",it,newval,alpha,err,db,S.last_iter,min(eta),beta[3]/S
+> .xs[3])
+>         localerr=max(abs(S.gs(y-exp(eta),1)):/margin_p \ abs(S.gs(y-exp(eta),
+> 2)):/margin_e \ abs(S.gs(y-exp(eta),3)):/margin_i)
+>         printf("LOCAL_MARGIN_ERROR %g\n",localerr)
+>         fput(f,invtokens(strofreal((it,newval,alpha,err,db,S.last_iter,S.last
+> _error,min(eta),max(eta),localerr),"%24.16g"),","))
+>         if (err<1e-9 & db<1e-6 & abs(old-newval)/S.total<1e-10 & localerr<1e-
+> 8) {
+>             converged=1
+>             break
+>         }
+>     }
+>     fclose(f)
+>     st_numscalar("op_local_margin_error",localerr)
+>     st_numscalar("op_converged",converged)
+>     if (!converged) _error(430)
+>     mu=exp(eta);assert(!hasmissing(eta));assert(all(select(mu,y:>0):>0))
+>     S.withx=0;S.weights(mu);xr=J(S.n,4,.)
+>     for (j=1;j<=4;j++) {
+>         c=S.solve_score(mu:*S.x[,j],2e-12)
+>         xr[,j]=S.pair_residual(S.x[,j]-S.z(c))
+>         printf("MATA_INFERENCE term=%g CG=%g residual=%g\n",j,S.last_iter,S.l
+> ast_error)
+>     }
+>     H=quadcross(xr,mu,xr);Hi=invsym(H);assert(all(diagonal(Hi):>0))
+>     printf("MATA_COV H=%gx%g Hi=%gx%g xs=%gx%g\n",rows(H),cols(H),rows(Hi),co
+> ls(Hi),rows(S.xs),cols(S.xs))
+>     clusters=S.gs((y-mu):*xr,1)
+>     printf("MATA_COV cluster_scores=%gx%g\n",rows(clusters),cols(clusters))
+>     V=diag(1:/S.xs')*Hi*quadcross(clusters,clusters)*Hi*diag(1:/S.xs')*(S.np/
+> (S.np-1))
+>     printf("MATA_COV V=%gx%g\n",rows(V),cols(V))
+>     printf("MATA_COV beta=%gx%g\n",rows(beta),cols(beta))
+>     coef=beta:/(S.xs')
+>     printf("MATA_OUTPUT coef=%gx%g\n",rows(coef),cols(coef))
+>     se=sqrt(diagonal(V))
+>     printf("MATA_OUTPUT se=%gx%g\n",rows(se),cols(se))
+>     assert(!hasmissing(V));assert(min(se)>0)
+>     st_matrix("op_B",coef');st_matrix("op_V",V)
+>     printf("MATA_OUTPUT matrices_saved\n")
+>     results=(coef,se,2*normal(-abs(coef:/se)),coef-1.95996398454*se,coef+1.95
+> 996398454*se)
+>     printf("MATA_OUTPUT result_table_saved\n")
+>     st_matrix("op_results",results)
+>     printf("MATA_OUTPUT observations=%g eta=%gx%g mu=%gx%g indices=%g,%g\n",s
+> t_nobs(),rows(eta),cols(eta),rows(mu),cols(mu),st_varindex("op_eta"),st_varin
+> dex("op_mu"))
+>     st_store((1::S.n),st_varindex("op_eta"),eta:+ln(1e9))
+>     st_store((1::S.n),st_varindex("op_mu"),mu:*1e9)
+>     st_numscalar("op_N",S.n);st_numscalar("op_pairs",S.np);st_numscalar("op_i
+> terations",it)
+>     st_numscalar("op_score",S.score(y-mu));st_numscalar("op_objective",oil_ob
+> jective(eta,y))
+>     orth=0;sp_orth=0
+>     for (j=1;j<=4;j++) {
+>         orth=max((orth,max(abs(S.gs(mu:*xr[,j],1)\S.gs(mu:*xr[,j],2)\S.gs(mu:
+> *xr[,j],3)))/S.total))
+>         if (hastrend) sp_orth=max((sp_orth,max(abs(S.gs(mu:*S.t:*xr[,j],1)))/
+> S.total))
+>     }
+>     st_numscalar("op_orth",orth);st_numscalar("op_slope_orth",sp_orth)
+>     assert(orth<1e-8 & sp_orth<1e-8)
+>     printf("MATA_COMPLETED converged=1 score=%g orth=%g slope_orth=%g\n",S.sc
+> ore(y-mu),orth,sp_orth)
+> }
+
+: end
+-------------------------------------------------------------------------------
+
+. 
+. capture program drop oil_sparse_ppml
+
+. program define oil_sparse_ppml,eclass
+  1.     version 17
+  2.     syntax , TREND(integer) [MAXIter(integer 120)]
+  3.     tempvar sample
+  4.     tempfile iterfile
+  5.     gen byte `sample'=1
+  6.     mata: oil_fit(`trend',`maxiter',st_local("iterfile"))
+  7.     copy "`iterfile'" "iterations.csv",replace
+  8.     matrix colnames op_B=meanpd5_post pri5_post trendpd5_post distance_pos
+> t2022
+  9.     matrix colnames op_V=meanpd5_post pri5_post trendpd5_post distance_pos
+> t2022
+ 10.     matrix rownames op_V=meanpd5_post pri5_post trendpd5_post distance_pos
+> t2022
+ 11.     ereturn post op_B op_V,esample(`sample') obs(`=scalar(op_N)')
+ 12.     ereturn scalar converged=scalar(op_converged)
+ 13.     ereturn scalar N_clust=scalar(op_pairs)
+ 14.     ereturn scalar ic=scalar(op_iterations)
+ 15.     ereturn scalar score_relative=scalar(op_score)
+ 16.     ereturn scalar local_margin_relative_error=scalar(op_local_margin_erro
+> r)
+ 17.     ereturn scalar FE_orthogonality=scalar(op_orth)
+ 18.     ereturn scalar slope_orthogonality=scalar(op_slope_orth)
+ 19.     ereturn local cmd "oil_sparse_ppml"
+ 20.     ereturn local title "Independent Stata/Mata PPML numerical verificatio
+> n"
+ 21.     ereturn local vce "cluster"
+ 22.     ereturn local clustvar "pair_id"
+ 23.     ereturn display
+ 24. end
+
+. 
+end of do-file
+
+. tempname h
+
+. postfile `h' str12 model str32 term double b se p N converged using "历史安慰
+> 剂/results.dta",replace
+
+. foreach name in PL2015 PL2017 {
+  2.     use "历史安慰剂/`name'_input.dta",clear
+  3.     isid ex im year
+  4.     local expected=_N
+  5.     ppmlhdfe tradevalue meanpd5_post pri5_post trendpd5_post distance_post
+> 2022, absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simp
+> lex) tolerance(1e-10) maxiter(500) use_exact_solver(1) d(__fe)
+  6.     assert e(N)==`expected' & e(converged)==1
+  7.     gen byte estimation_sample=e(sample)
+  8.     assert estimation_sample==1
+  9.     estimates save "历史安慰剂/`name'.ster",replace
+ 10.     predict double fitted,mu
+ 11.     gen double predictor=ln(fitted)
+ 12.     save "历史安慰剂/`name'_estimated.dta",replace
+ 13.     foreach term in meanpd5_post pri5_post trendpd5_post distance_post2022
+>  {
+ 14.         post `h' ("`name'") ("`term'") (_b[`term']) (_se[`term']) (2*norma
+> l(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+ 15.     }
+ 16.     test meanpd5_post pri5_post trendpd5_post
+ 17.     matrix FullV=e(V)
+ 18.     matrix colnames FullV=meanpd5_post pri5_post trendpd5_post distance_po
+> st2022 constant
+ 19.     preserve
+ 20.     clear
+ 21.     svmat double FullV,names(col)
+ 22.     save "历史安慰剂/`name'_covariance.dta",replace
+ 23.     restore
+ 24.     egen long __op_p=group(pair_id)
+ 25.     egen long __op_e=group(ex_year)
+ 26.     egen long __op_i=group(im_year)
+ 27.     gen double op_eta=.
+ 28.     gen double op_mu=.
+ 29.     local oldpwd `"`c(pwd)'"'
+ 30.     capture mkdir "历史安慰剂/`name'_local"
+ 31.     cd "历史安慰剂/`name'_local"
+ 32.     oil_sparse_ppml,trend(0) maxiter(150)
+ 33.     assert e(N)==`expected' & e(converged)==1 & e(local_margin_relative_er
+> ror)<1e-8
+ 34.     estimates save "local.ster",replace
+ 35.     foreach term in meanpd5_post pri5_post trendpd5_post distance_post2022
+>  {
+ 36.         post `h' ("`name'_local") ("`term'") (_b[`term']) (_se[`term']) (2
+> *normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+ 37.     }
+ 38.     save "validated_predictions.dta",replace
+ 39.     matrix LocalV=e(V)
+ 40.     clear
+ 41.     svmat double LocalV,names(col)
+ 42.     save "covariance.dta",replace
+ 43.     cd `"`oldpwd'"'
+ 44. }
+warning: dependent variable takes very low values after standardizing (5.7255e-
+> 11)
+Iteration 1:   deviance = 1.0875e+13  eps = .         iters = 6    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -5.02  PS  
+Iteration 2:   deviance = 5.4840e+12  eps = 9.83e-01  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -6.82   S  
+Iteration 3:   deviance = 4.0890e+12  eps = 3.41e-01  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -9.67   S  
+Iteration 4:   deviance = 3.6193e+12  eps = 1.30e-01  iters = 8    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -13.07   S  
+Iteration 5:   deviance = 3.4587e+12  eps = 4.64e-02  iters = 9    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -16.20   S  
+Iteration 6:   deviance = 3.4028e+12  eps = 1.64e-02  iters = 9    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -18.98   S  
+Iteration 7:   deviance = 3.3826e+12  eps = 5.98e-03  iters = 8    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -22.08   S  
+Iteration 8:   deviance = 3.3751e+12  eps = 2.21e-03  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -24.99   S  
+Iteration 9:   deviance = 3.3724e+12  eps = 8.14e-04  iters = 5    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -27.75   S  
+Iteration 10:  deviance = 3.3714e+12  eps = 2.94e-04  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -30.21   S  
+Iteration 11:  deviance = 3.3710e+12  eps = 1.04e-04  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -32.22   S  
+Iteration 12:  deviance = 3.3709e+12  eps = 3.54e-05  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -34.46   S  
+Iteration 13:  deviance = 3.3709e+12  eps = 1.20e-05  iters = 11   tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -36.48   S  
+Iteration 14:  deviance = 3.3709e+12  eps = 3.73e-06  iters = 7    tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -39.32   S  
+Iteration 15:  deviance = 3.3709e+12  eps = 1.13e-06  iters = 20   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -41.89   S  
+Iteration 16:  deviance = 3.3709e+12  eps = 3.46e-07  iters = 16   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -44.37   S  
+Iteration 17:  deviance = 3.3709e+12  eps = 8.70e-08  iters = 27   tol = 1.0e-0
+> 7                                                                            
+>    min(eta) = -47.16   S  
+Iteration 18:  deviance = 3.3709e+12  eps = 2.26e-08  iters = 50   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -49.72   S  
+Iteration 19:  deviance = 3.3709e+12  eps = 5.50e-09  iters = 41   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -51.86   S  
+Iteration 20:  deviance = 3.3709e+12  eps = 1.42e-09  iters = 66   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -53.89   S  
+Iteration 21:  deviance = 3.3709e+12  eps = 3.66e-10  iters = 46   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -55.71   S  
+Iteration 22:  deviance = 3.3709e+12  eps = 1.34e-11  iters = 11   tol = 1.0e-1
+> 0                                                                            
+>    min(eta) = -56.38   S O
+-------------------------------------------------------------------------------
+> -----------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon 
+> below tolerance)
+Converged in 22 iterations and 373 HDFE sub-iterations (tol = 1.0e-10)
+
+HDFE PPML regression                              No. of obs      =     60,705
+Absorbing 3 HDFE groups                           Residual df     =      3,647
+Statistics robust to heteroskedasticity           Wald chi2(4)    =      14.23
+Deviance             =  3.37086e+12               Prob > chi2     =     0.0066
+Log pseudolikelihood = -1.68543e+12               Pseudo R2       =     0.9699
+
+Number of clusters (pair_id)=      3,648
+                            (Std. err. adjusted for 3,648 clusters in pair_id)
+------------------------------------------------------------------------------
+             |               Robust
+  tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+meanpd5_post |   .2210726   .1017932     2.17   0.030     .0215616    .4205836
+   pri5_post |   .0488425   .5170999     0.09   0.925    -.9646547     1.06234
+trendpd5_p~t |   .8724298   .9873583     0.88   0.377    -1.062757    2.807617
+distanc~2022 |   .1132471   .0598034     1.89   0.058    -.0039653    .2304596
+       _cons |   22.14793   .1087845   203.59   0.000     21.93472    22.36114
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      3648        3648           0    *|
+     ex_year |      2295           1        2294     |
+     im_year |      2488          20        2468     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(note: file 历史安慰剂/PL2015.ster not found)
+file 历史安慰剂/PL2015.ster saved
+(26 missing values generated)
+file 历史安慰剂/PL2015_estimated.dta saved
+
+ ( 1)  meanpd5_post = 0
+ ( 2)  pri5_post = 0
+ ( 3)  trendpd5_post = 0
+
+           chi2(  3) =    6.80
+         Prob > chi2 =    0.0785
+number of observations will be reset to 5
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 5.
+file 历史安慰剂/PL2015_covariance.dta saved
+(60,705 missing values generated)
+(60,705 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks\历史安慰剂\PL2015_local
+COLD_START_MATA N=60705 pairs=3648 trend=0
+MATA_ITER 1 obj=      -11793.34830751 alpha=.5 score=.121817481 beta_step=.1863
+> 16559 CG=70 mineta=-27.0165779 btrend=.186316559
+LOCAL_MARGIN_ERROR 50340272.3
+MATA_ITER 2 obj=      -13037.49870762 alpha=1 score=.034311401 beta_step=.56987
+> 7336 CG=85 mineta=-28.0563229 btrend=.756193895
+LOCAL_MARGIN_ERROR 18707296.5
+MATA_ITER 3 obj=      -13272.06704528 alpha=1 score=.007855936 beta_step=.10645
+> 078 CG=86 mineta=-30.102216 btrend=.862644676
+LOCAL_MARGIN_ERROR 6891081.23
+MATA_ITER 4 obj=       -13324.2729091 alpha=1 score=.002280864 beta_step=.04410
+> 3386 CG=90 mineta=-32.3907352 btrend=.866981426
+LOCAL_MARGIN_ERROR 2535530.16
+MATA_ITER 5 obj=      -13337.94066369 alpha=1 score=.000731753 beta_step=.00829
+> 8527 CG=99 mineta=-34.7968217 btrend=.872055262
+LOCAL_MARGIN_ERROR 932780.355
+MATA_ITER 6 obj=      -13341.87014691 alpha=1 score=.000228022 beta_step=.00036
+> 5156 CG=110 mineta=-37.6772712 btrend=.872420418
+LOCAL_MARGIN_ERROR 343151.403
+MATA_ITER 7 obj=      -13342.86141932 alpha=1 score=.000057747 beta_step=7.1726
+> e-06 CG=125 mineta=-40.3630128 btrend=.872425722
+LOCAL_MARGIN_ERROR 126238.172
+MATA_ITER 8 obj=      -13343.06303657 alpha=1 score=8.5678e-06 beta_step=2.7241
+> e-06 CG=140 mineta=-42.755767 btrend=.872428446
+LOCAL_MARGIN_ERROR 46440.1685
+MATA_ITER 9 obj=      -13343.11031026 alpha=1 score=7.7326e-07 beta_step=7.7344
+> e-07 CG=155 mineta=-44.8609397 btrend=.872429219
+LOCAL_MARGIN_ERROR 17084.119
+MATA_ITER 10 obj=      -13343.12416633 alpha=1 score=2.3527e-07 beta_step=5.875
+> 7e-07 CG=171 mineta=-46.8699189 btrend=.872429807
+LOCAL_MARGIN_ERROR 6284.63193
+MATA_ITER 11 obj=      -13343.12770654 alpha=1 score=5.5760e-08 beta_step=2.786
+> 7e-08 CG=178 mineta=-48.8750114 btrend=.872429835
+LOCAL_MARGIN_ERROR 2311.72267
+MATA_ITER 12 obj=      -13343.12846062 alpha=1 score=1.8778e-08 beta_step=3.146
+> 5e-09 CG=193 mineta=-50.8813611 btrend=.872429836
+LOCAL_MARGIN_ERROR 850.171083
+MATA_ITER 13 obj=      -13343.12864261 alpha=1 score=6.2684e-09 beta_step=8.883
+> 2e-10 CG=198 mineta=-52.8844006 btrend=.872429835
+LOCAL_MARGIN_ERROR 312.496438
+MATA_ITER 14 obj=      -13343.12869187 alpha=1 score=1.9835e-09 beta_step=7.094
+> 4e-10 CG=210 mineta=-54.8651958 btrend=.872429834
+LOCAL_MARGIN_ERROR 114.697361
+MATA_ITER 15 obj=      -13343.12870433 alpha=1 score=5.8230e-10 beta_step=8.055
+> 5e-10 CG=218 mineta=-56.7310365 btrend=.872429833
+LOCAL_MARGIN_ERROR 41.9321545
+MATA_ITER 16 obj=      -13343.12870718 alpha=1 score=1.5068e-10 beta_step=8.551
+> 8e-10 CG=226 mineta=-58.1014378 btrend=.872429832
+LOCAL_MARGIN_ERROR 15.1660543
+MATA_ITER 17 obj=      -13343.12870778 alpha=1 score=3.4487e-11 beta_step=2.915
+> 2e-10 CG=231 mineta=-58.6207731 btrend=.872429832
+LOCAL_MARGIN_ERROR 5.3266549
+MATA_ITER 18 obj=      -13343.12870791 alpha=1 score=7.2898e-12 beta_step=1.783
+> 3e-11 CG=234 mineta=-58.6938763 btrend=.872429832
+LOCAL_MARGIN_ERROR 1.72599379
+MATA_ITER 19 obj=      -13343.12870794 alpha=1 score=1.4528e-12 beta_step=1.735
+> 3e-13 CG=235 mineta=-58.695796 btrend=.872429832
+LOCAL_MARGIN_ERROR .447259472
+MATA_ITER 20 obj=      -13343.12870794 alpha=1 score=1.9216e-13 beta_step=3.041
+> 5e-16 CG=233 mineta=-58.6957976 btrend=.872429832
+LOCAL_MARGIN_ERROR .062508744
+MATA_ITER 21 obj=      -13343.12870794 alpha=1 score=2.5071e-14 beta_step=6.201
+> 6e-16 CG=233 mineta=-58.6957976 btrend=.872429832
+LOCAL_MARGIN_ERROR .0018032
+MATA_ITER 22 obj=      -13343.12870794 alpha=1 score=3.4591e-15 beta_step=7.035
+> 1e-16 CG=234 mineta=-58.6957976 btrend=.872429832
+LOCAL_MARGIN_ERROR .000196723
+MATA_ITER 23 obj=      -13343.12870794 alpha=1 score=9.6758e-17 beta_step=1.042
+> 8e-15 CG=196 mineta=-58.6957976 btrend=.872429832
+LOCAL_MARGIN_ERROR 8.8894e-06
+MATA_ITER 24 obj=      -13343.12870794 alpha=1 score=9.3605e-18 beta_step=3.031
+> 3e-15 CG=192 mineta=-58.6957976 btrend=.872429832
+LOCAL_MARGIN_ERROR 8.1026e-09
+MATA_INFERENCE term=1 CG=212 residual=2.4474e-10
+MATA_INFERENCE term=2 CG=211 residual=2.6090e-10
+MATA_INFERENCE term=3 CG=213 residual=1.7986e-10
+MATA_INFERENCE term=4 CG=207 residual=3.3808e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=3648x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=60705 eta=60705x1 mu=60705x1 indices=19,20
+MATA_COMPLETED converged=1 score=9.3605e-18 orth=3.4036e-14 slope_orth=0
+                            (Std. err. adjusted for 3,648 clusters in pair_id)
+------------------------------------------------------------------------------
+             | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+meanpd5_post |   .2210726   .1017932     2.17   0.030     .0215616    .4205836
+   pri5_post |   .0488425   .5170999     0.09   0.925    -.9646547     1.06234
+trendpd5_p~t |   .8724298   .9873583     0.88   0.377    -1.062757    2.807617
+distanc~2022 |   .1132471   .0598034     1.89   0.058    -.0039653    .2304596
+------------------------------------------------------------------------------
+(note: file local.ster not found)
+file local.ster saved
+file validated_predictions.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks
+warning: dependent variable takes very low values after standardizing (5.8540e-
+> 11)
+Iteration 1:   deviance = 1.2439e+13  eps = .         iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -5.45  PS  
+Iteration 2:   deviance = 6.3393e+12  eps = 9.62e-01  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -7.50   S  
+Iteration 3:   deviance = 4.7392e+12  eps = 3.38e-01  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -10.25   S  
+Iteration 4:   deviance = 4.1988e+12  eps = 1.29e-01  iters = 8    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -13.95   S  
+Iteration 5:   deviance = 4.0145e+12  eps = 4.59e-02  iters = 9    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -17.14   S  
+Iteration 6:   deviance = 3.9508e+12  eps = 1.61e-02  iters = 9    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -19.61   S  
+Iteration 7:   deviance = 3.9277e+12  eps = 5.86e-03  iters = 8    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -21.94   S  
+Iteration 8:   deviance = 3.9193e+12  eps = 2.16e-03  iters = 7    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -24.85   S  
+Iteration 9:   deviance = 3.9162e+12  eps = 7.89e-04  iters = 5    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -27.61   S  
+Iteration 10:  deviance = 3.9151e+12  eps = 2.84e-04  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -30.04   S  
+Iteration 11:  deviance = 3.9147e+12  eps = 1.00e-04  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -32.77   S  
+Iteration 12:  deviance = 3.9146e+12  eps = 3.44e-05  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -35.31   S  
+Iteration 13:  deviance = 3.9145e+12  eps = 1.15e-05  iters = 10   tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -37.47   S  
+Iteration 14:  deviance = 3.9145e+12  eps = 3.58e-06  iters = 6    tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -39.98   S  
+Iteration 15:  deviance = 3.9145e+12  eps = 1.09e-06  iters = 19   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -42.48   S  
+Iteration 16:  deviance = 3.9145e+12  eps = 2.83e-07  iters = 16   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -44.40   S  
+Iteration 17:  deviance = 3.9145e+12  eps = 7.09e-08  iters = 27   tol = 1.0e-0
+> 7                                                                            
+>    min(eta) = -46.73   S  
+Iteration 18:  deviance = 3.9145e+12  eps = 1.88e-08  iters = 41   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -49.32   S  
+Iteration 19:  deviance = 3.9145e+12  eps = 4.64e-09  iters = 35   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -51.54   S  
+Iteration 20:  deviance = 3.9145e+12  eps = 1.16e-09  iters = 45   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -53.42   S  
+Iteration 21:  deviance = 3.9145e+12  eps = 2.52e-10  iters = 66   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -54.98   S  
+Iteration 22:  deviance = 3.9145e+12  eps = 1.54e-11  iters = 28   tol = 1.0e-1
+> 0                                                                            
+>    min(eta) = -55.67   S O
+-------------------------------------------------------------------------------
+> -----------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon 
+> below tolerance)
+Converged in 22 iterations and 372 HDFE sub-iterations (tol = 1.0e-10)
+
+HDFE PPML regression                              No. of obs      =     69,741
+Absorbing 3 HDFE groups                           Residual df     =      3,839
+Statistics robust to heteroskedasticity           Wald chi2(4)    =      22.87
+Deviance             =  3.91450e+12               Prob > chi2     =     0.0001
+Log pseudolikelihood = -1.95725e+12               Pseudo R2       =     0.9685
+
+Number of clusters (pair_id)=      3,840
+                            (Std. err. adjusted for 3,840 clusters in pair_id)
+------------------------------------------------------------------------------
+             |               Robust
+  tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+meanpd5_post |   .3283555    .088348     3.72   0.000     .1551966    .5015144
+   pri5_post |  -.6475014   .6062718    -1.07   0.286    -1.835772    .5407696
+trendpd5_p~t |   1.171376   .7874304     1.49   0.137    -.3719588    2.714712
+distanc~2022 |   .1526405   .0708918     2.15   0.031     .0136951    .2915858
+       _cons |   22.06505   .1363935   161.77   0.000     21.79773    22.33238
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      3840        3840           0    *|
+     ex_year |      2559           1        2558     |
+     im_year |      2734          22        2712     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(note: file 历史安慰剂/PL2017.ster not found)
+file 历史安慰剂/PL2017.ster saved
+(33 missing values generated)
+file 历史安慰剂/PL2017_estimated.dta saved
+
+ ( 1)  meanpd5_post = 0
+ ( 2)  pri5_post = 0
+ ( 3)  trendpd5_post = 0
+
+           chi2(  3) =   15.35
+         Prob > chi2 =    0.0015
+number of observations will be reset to 5
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 5.
+file 历史安慰剂/PL2017_covariance.dta saved
+(69,741 missing values generated)
+(69,741 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks\历史安慰剂\PL2017_local
+COLD_START_MATA N=69741 pairs=3840 trend=0
+MATA_ITER 1 obj=      -12564.90248025 alpha=.5 score=.110749543 beta_step=.1782
+> 7619 CG=69 mineta=-26.4311998 btrend=.176178775
+LOCAL_MARGIN_ERROR 69402716.9
+MATA_ITER 2 obj=      -13979.25609594 alpha=1 score=.032434268 beta_step=.84070
+> 4265 CG=96 mineta=-27.3637952 btrend=1.01688304
+LOCAL_MARGIN_ERROR 25535582
+MATA_ITER 3 obj=      -14268.31752586 alpha=1 score=.006843277 beta_step=.21706
+> 7166 CG=95 mineta=-29.5303134 btrend=1.17974485
+LOCAL_MARGIN_ERROR 9395136.38
+MATA_ITER 4 obj=      -14333.53053171 alpha=1 score=.001766096 beta_step=.07584
+> 553 CG=91 mineta=-32.0965331 btrend=1.17745772
+LOCAL_MARGIN_ERROR 3456303.91
+MATA_ITER 5 obj=      -14348.83753554 alpha=1 score=.00043665 beta_step=.011060
+> 298 CG=96 mineta=-34.8994487 btrend=1.17141952
+LOCAL_MARGIN_ERROR 1271503.69
+MATA_ITER 6 obj=      -14352.74058831 alpha=1 score=.000086275 beta_step=.00061
+> 4129 CG=105 mineta=-37.7176132 btrend=1.17132808
+LOCAL_MARGIN_ERROR 467759.973
+MATA_ITER 7 obj=      -14353.81654516 alpha=1 score=.000017506 beta_step=.00004
+> 1512 CG=118 mineta=-40.3872683 btrend=1.17136959
+LOCAL_MARGIN_ERROR 172079.026
+MATA_ITER 8 obj=      -14354.14772358 alpha=1 score=6.3203e-06 beta_step=5.7441
+> e-06 CG=129 mineta=-42.7781213 btrend=1.17137534
+LOCAL_MARGIN_ERROR 63304.0719
+MATA_ITER 9 obj=      -14354.25909243 alpha=1 score=2.2682e-06 beta_step=1.0022
+> e-06 CG=145 mineta=-44.8756083 btrend=1.17137634
+LOCAL_MARGIN_ERROR 23288.0024
+MATA_ITER 10 obj=      -14354.29579176 alpha=1 score=7.8144e-07 beta_step=1.090
+> 5e-07 CG=157 mineta=-46.8663563 btrend=1.17137645
+LOCAL_MARGIN_ERROR 8566.91306
+MATA_ITER 11 obj=      -14354.30665844 alpha=1 score=2.4007e-07 beta_step=6.426
+> 8e-08 CG=170 mineta=-48.8461269 btrend=1.17137643
+LOCAL_MARGIN_ERROR 3151.32697
+MATA_ITER 12 obj=      -14354.30912306 alpha=1 score=5.3639e-08 beta_step=3.233
+> 7e-09 CG=185 mineta=-50.7975059 btrend=1.17137643
+LOCAL_MARGIN_ERROR 1159.04422
+MATA_ITER 13 obj=      -14354.30950944 alpha=1 score=8.1996e-09 beta_step=3.504
+> 8e-10 CG=198 mineta=-52.6598382 btrend=1.17137643
+LOCAL_MARGIN_ERROR 426.124458
+MATA_ITER 14 obj=      -14354.30958394 alpha=1 score=2.4825e-09 beta_step=1.914
+> 4e-10 CG=211 mineta=-54.2915334 btrend=1.17137643
+LOCAL_MARGIN_ERROR 156.498617
+MATA_ITER 15 obj=      -14354.30960274 alpha=1 score=6.8671e-10 beta_step=1.053
+> 5e-10 CG=221 mineta=-55.4394001 btrend=1.17137643
+LOCAL_MARGIN_ERROR 57.3095531
+MATA_ITER 16 obj=      -14354.30960731 alpha=1 score=1.8276e-10 beta_step=2.554
+> 3e-11 CG=232 mineta=-55.9365799 btrend=1.17137643
+LOCAL_MARGIN_ERROR 20.8219379
+MATA_ITER 17 obj=      -14354.30960835 alpha=1 score=4.7659e-11 beta_step=3.410
+> 7e-12 CG=236 mineta=-56.0259674 btrend=1.17137643
+LOCAL_MARGIN_ERROR 7.40428113
+MATA_ITER 18 obj=      -14354.30960857 alpha=1 score=1.1929e-11 beta_step=1.189
+> 5e-11 CG=237 mineta=-56.0293302 btrend=1.17137643
+LOCAL_MARGIN_ERROR 2.48242263
+MATA_ITER 19 obj=       -14354.3096086 alpha=1 score=2.2616e-12 beta_step=1.816
+> 7e-11 CG=233 mineta=-56.0293357 btrend=1.17137643
+LOCAL_MARGIN_ERROR .707251259
+MATA_ITER 20 obj=       -14354.3096086 alpha=1 score=1.9409e-13 beta_step=4.511
+> 7e-12 CG=196 mineta=-56.0293357 btrend=1.17137643
+LOCAL_MARGIN_ERROR .128197799
+MATA_ITER 21 obj=       -14354.3096086 alpha=1 score=4.0099e-15 beta_step=6.326
+> 7e-14 CG=221 mineta=-56.0293357 btrend=1.17137643
+LOCAL_MARGIN_ERROR .007015379
+MATA_ITER 22 obj=       -14354.3096086 alpha=1 score=6.6550e-18 beta_step=1.904
+> 6e-15 CG=15 mineta=-56.0293357 btrend=1.17137643
+LOCAL_MARGIN_ERROR .00002438
+MATA_ITER 23 obj=       -14354.3096086 alpha=1 score=2.6336e-17 beta_step=2.213
+> 2e-16 CG=2 mineta=-56.0293357 btrend=1.17137643
+LOCAL_MARGIN_ERROR 2.9717e-10
+MATA_INFERENCE term=1 CG=225 residual=2.1843e-10
+MATA_INFERENCE term=2 CG=224 residual=3.3397e-10
+MATA_INFERENCE term=3 CG=226 residual=2.0537e-10
+MATA_INFERENCE term=4 CG=222 residual=3.0439e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=3840x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=69741 eta=69741x1 mu=69741x1 indices=19,20
+MATA_COMPLETED converged=1 score=2.6336e-17 orth=2.1788e-14 slope_orth=0
+                            (Std. err. adjusted for 3,840 clusters in pair_id)
+------------------------------------------------------------------------------
+             | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+meanpd5_post |   .3283555    .088348     3.72   0.000     .1551966    .5015144
+   pri5_post |  -.6475014   .6062718    -1.07   0.286    -1.835772    .5407696
+trendpd5_p~t |   1.171376   .7874304     1.49   0.137    -.3719588    2.714712
+distanc~2022 |   .1526405   .0708918     2.15   0.031     .0136951    .2915858
+------------------------------------------------------------------------------
+(note: file local.ster not found)
+file local.ster saved
+file validated_predictions.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks
+
+. postclose `h'
+
+. use "历史安慰剂/results.dta",clear
+
+. export delimited using "历史安慰剂/results.csv",replace
+file 历史安慰剂/results.csv saved
+
+. display "HISTORICAL_PLACEBOS_COMPLETE"
+HISTORICAL_PLACEBOS_COMPLETE
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks\历史安慰剂/stata
+> _run.log
+  log type:  text
+ closed on:   5 Nov 2026, 23:30:36
+-------------------------------------------------------------------------------

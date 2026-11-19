@@ -1,0 +1,257 @@
+{
+  "panel_sha256": "719ed246bf472bc78f946cc81f7bdb9006392b06b64fcec2416b387c69a1f722",
+  "years": [
+    2021,
+    2023,
+    2024
+  ],
+  "common_reporters": 94,
+  "common_reporter_codes": [
+    "AGO",
+    "ATG",
+    "AUS",
+    "AUT",
+    "AZE",
+    "BEL",
+    "BGR",
+    "BHS",
+    "BOL",
+    "BRA",
+    "BRN",
+    "BWA",
+    "CAN",
+    "CHE",
+    "CHL",
+    "CHN",
+    "CIV",
+    "COD",
+    "COG",
+    "COL",
+    "CRI",
+    "CYP",
+    "CZE",
+    "DEU",
+    "DNK",
+    "DOM",
+    "ECU",
+    "EGY",
+    "ESP",
+    "EST",
+    "FIN",
+    "FRA",
+    "GBR",
+    "GHA",
+    "GRC",
+    "GTM",
+    "GUY",
+    "HRV",
+    "HUN",
+    "IDN",
+    "IND",
+    "IRL",
+    "ISL",
+    "ISR",
+    "ITA",
+    "JAM",
+    "JOR",
+    "JPN",
+    "KAZ",
+    "KGZ",
+    "KOR",
+    "LBR",
+    "LKA",
+    "LSO",
+    "LTU",
+    "LUX",
+    "LVA",
+    "MDA",
+    "MLT",
+    "MOZ",
+    "MWI",
+    "MYS",
+    "NAM",
+    "NIC",
+    "NLD",
+    "NOR",
+    "NZL",
+    "OMN",
+    "PAK",
+    "PER",
+    "PHL",
+    "POL",
+    "PRT",
+    "PRY",
+    "QAT",
+    "ROU",
+    "SEN",
+    "SGP",
+    "SRB",
+    "SVK",
+    "SWE",
+    "THA",
+    "TTO",
+    "TUN",
+    "TZA",
+    "UGA",
+    "UKR",
+    "URY",
+    "USA",
+    "UZB",
+    "WSM",
+    "ZAF",
+    "ZMB",
+    "ZWE"
+  ],
+  "reporters_by_year": {
+    "2021": 125,
+    "2023": 120,
+    "2024": 114
+  },
+  "eu27_in_common": [
+    "AUT",
+    "BEL",
+    "BGR",
+    "CYP",
+    "CZE",
+    "DEU",
+    "DNK",
+    "ESP",
+    "EST",
+    "FIN",
+    "FRA",
+    "GRC",
+    "HRV",
+    "HUN",
+    "IRL",
+    "ITA",
+    "LTU",
+    "LUX",
+    "LVA",
+    "MLT",
+    "NLD",
+    "POL",
+    "PRT",
+    "ROU",
+    "SVK",
+    "SWE"
+  ],
+  "eu27_not_in_common": [
+    "SVN"
+  ],
+  "middle_east_codes": [
+    "ARE",
+    "BHR",
+    "IRN",
+    "IRQ",
+    "ISR",
+    "JOR",
+    "KWT",
+    "LBN",
+    "OMN",
+    "PSE",
+    "QAT",
+    "SAU",
+    "SYR",
+    "YEM"
+  ],
+  "summary": [
+    {
+      "year": 2021,
+      "importers": 94,
+      "amount_usd": 1017486711815.042,
+      "positive_links": 1025,
+      "invalid_weight_positive_links": 57,
+      "invalid_weight_amount_usd": 24187445762.130005
+    },
+    {
+      "year": 2023,
+      "importers": 94,
+      "amount_usd": 1324043658227.0781,
+      "positive_links": 1013,
+      "invalid_weight_positive_links": 29,
+      "invalid_weight_amount_usd": 4627930594.41
+    },
+    {
+      "year": 2024,
+      "importers": 94,
+      "amount_usd": 1293711865879.298,
+      "positive_links": 989,
+      "invalid_weight_positive_links": 36,
+      "invalid_weight_amount_usd": 18309464027.783997
+    }
+  ],
+  "individual": [
+    {
+      "im": "CHN",
+      "year": 2021,
+      "amount_usd": 40544444787.0,
+      "weight_kg": 79641030000.0
+    },
+    {
+      "im": "CHN",
+      "year": 2023,
+      "amount_usd": 60679212744.0,
+      "weight_kg": 99550328575.211
+    },
+    {
+      "im": "CHN",
+      "year": 2024,
+      "amount_usd": 62589755078.0,
+      "weight_kg": 108469240000.0
+    },
+    {
+      "im": "IND",
+      "year": 2021,
+      "amount_usd": 2309767897.811,
+      "weight_kg": 4543236000.0
+    },
+    {
+      "im": "IND",
+      "year": 2023,
+      "amount_usd": 48639765433.583,
+      "weight_kg": 88920220325.0
+    },
+    {
+      "im": "IND",
+      "year": 2024,
+      "amount_usd": 52727893909.941,
+      "weight_kg": 92008859000.0
+    }
+  ],
+  "group_definition_unchanged": true,
+  "zero_weight_missing_never_replaced_with_zero": true,
+  "regression_inputs_unchanged": true,
+  "table_amount_and_weight_use_same_fixed_pairs": true,
+  "excluded_mass_pairs": [
+    {
+      "flow": "RUS_EU27",
+      "ex": "RUS",
+      "im": "ESP"
+    },
+    {
+      "flow": "RUS_EU27",
+      "ex": "RUS",
+      "im": "IRL"
+    },
+    {
+      "flow": "ME_EU27",
+      "ex": "SAU",
+      "im": "BEL"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "CZE"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "HRV"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "HUN"
+    }
+  ]
+}

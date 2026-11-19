@@ -1,0 +1,40 @@
+{
+  "common_reporters": 94,
+  "eu_members": 26,
+  "middle_east_definition": 14,
+  "excluded_flow_pairs": [
+    {
+      "flow": "RUS_EU27",
+      "ex": "RUS",
+      "im": "ESP"
+    },
+    {
+      "flow": "RUS_EU27",
+      "ex": "RUS",
+      "im": "IRL"
+    },
+    {
+      "flow": "ME_EU27",
+      "ex": "SAU",
+      "im": "BEL"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "CZE"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "HRV"
+    },
+    {
+      "flow": "USA_EU27",
+      "ex": "USA",
+      "im": "HUN"
+    }
+  ],
+  "exact_aggregates_match": true,
+  "no_model_estimated": true,
+  "original_data_read_only": true
+}

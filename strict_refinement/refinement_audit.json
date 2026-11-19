@@ -1,0 +1,38 @@
+[
+  {
+    "year": 2023,
+    "kind": "cold",
+    "N": 74107,
+    "passed": true,
+    "reason": "Passed",
+    "original_keys_and_amounts_identical": true,
+    "local_relative_margins": {
+      "pair": 4.898678367551189e-09,
+      "exporter_year": 7.856966874743517e-10,
+      "importer_year": 3.2762206384596825e-15
+    },
+    "predictor_column_span_max_error": 2.971844992316619e-11,
+    "pair_time_moment": 3.760462106290346e-10,
+    "coefficient_scores": 3.6974410918906296e-17,
+    "covariance_iteration_stability": 6.317169010117141e-14,
+    "covariance_global_projection_error": 1.7429563456099083e-15
+  },
+  {
+    "year": 2024,
+    "kind": "cold",
+    "N": 78109,
+    "passed": true,
+    "reason": "Passed",
+    "original_keys_and_amounts_identical": true,
+    "local_relative_margins": {
+      "pair": 4.508930903266987e-09,
+      "exporter_year": 7.793775528969215e-12,
+      "importer_year": 2.9485026050014314e-15
+    },
+    "predictor_column_span_max_error": 2.8827162878997115e-11,
+    "pair_time_moment": 1.5853001759951559e-10,
+    "coefficient_scores": 4.717344220097536e-17,
+    "covariance_iteration_stability": 6.23945339839338e-14,
+    "covariance_global_projection_error": 1.9611571517144715e-15
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "stored_estimates/A.ster",
+    "old_hash": "6d617dffa5a7da8b8de4c28870fe9087389f6620b70525c70702b23449e980d6",
+    "new_hash": "224619e0dbd52392c533c1e452975086a5691f6f02988ac418b6b5d0cc918e46",
+    "reason": "Freshly re-estimated on original unchanged sample, validated against original coefficient/SE references."
+  },
+  {
+    "file": "stored_estimates/B.ster",
+    "old_hash": "5436f635c536887bca8eb4f45d1f1e5a4581b91da63494f1673e07a184470b21",
+    "new_hash": "f0c4266da0842f89dd7989e1156e89b1f98fc78c895111d3482aaa622ccb86f1",
+    "reason": "Freshly re-estimated on original unchanged sample, validated against original coefficient/SE references."
+  },
+  {
+    "file": "stored_estimates/C.ster",
+    "old_hash": "1b30afad4cb60de95b752f1177792652f4217abc811b5d69b0efce532d6d00f4",
+    "new_hash": "fa9e764c0406786a8f788902c087f9811f1d554437db14d85d74dccfb8b8777f",
+    "reason": "Freshly re-estimated on original unchanged sample, validated against original coefficient/SE references."
+  },
+  {
+    "file": "stored_estimates/D.ster",
+    "old_hash": "80637903c558bf19b382abfcaf0cb7ad75e475da0eb6b49d80b65aef7e711226",
+    "new_hash": "f44e081d9d2e9e46200c80a03bbfb2890e25011f410e9babd56f77f461fb337d",
+    "reason": "Freshly re-estimated on original unchanged sample, validated against original coefficient/SE references."
+  }
+]

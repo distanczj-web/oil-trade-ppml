@@ -1,0 +1,27 @@
+{
+  "year": 2023,
+  "N": 74107,
+  "pairs": 3664,
+  "converged": true,
+  "cold_start": true,
+  "criterion": "Every fixed-effect relative margin and normalized pair time moment below 1e-8; scaled coefficient scores below 1e-10; beta step below 1e-7",
+  "metrics": {
+    "pair": 4.898678367551189e-09,
+    "exporter_year": 7.856966874743517e-10,
+    "importer_year": 3.2762206384596825e-15,
+    "pair_time": 3.760462106290346e-10,
+    "regressors_global": 3.6974410918906296e-17
+  },
+  "beta": {
+    "meanpd5_post": 0.029334787514572552,
+    "pri5_post": -0.19625976032141776,
+    "trendpd5_post": -3.832479485403082,
+    "distance_post2022": -0.26415102848045074
+  },
+  "seconds": 311.31299999996554,
+  "local_projection_error": 1.0684477754653315e-07,
+  "global_projection_error": 1.7429563456099083e-15,
+  "slope_projection_error": 1.2076873849628332e-18,
+  "covariance_iteration_stability": 6.317169010117141e-14,
+  "positive_underflows": 0
+}

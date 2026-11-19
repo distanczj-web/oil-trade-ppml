@@ -1,0 +1,57 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\EE投稿完善_20261030\appendix_models\outputs/p
+> ost_estimation.log
+  log type:  text
+ opened on:  30 Oct 2026, 19:15:55
+
+. estimates use "outputs/event__AnnualEvent.ster"
+
+. tempname h
+
+. postfile `h' str32 test double chi2 double df double p long N using "outputs/
+> annual_tests.dta",replace
+(file outputs/annual_tests.dta not found)
+
+. test et2017 et2018 et2019 et2020
+
+ ( 1)  et2017 = 0
+ ( 2)  et2018 = 0
+ ( 3)  et2019 = 0
+ ( 4)  et2020 = 0
+
+           chi2(  4) =    7.81
+         Prob > chi2 =    0.0989
+
+. post `h' ("trajectory_pre_joint") (r(chi2)) (r(df)) (r(p)) (e(N))
+
+. test (et2022=et2023) (et2023=et2024)
+
+ ( 1)  et2022 - et2023 = 0
+ ( 2)  et2023 - et2024 = 0
+
+           chi2(  2) =    7.91
+         Prob > chi2 =    0.0192
+
+. post `h' ("trajectory_post_equality") (r(chi2)) (r(df)) (r(p)) (e(N))
+
+. postclose `h'
+
+. use "outputs/annual_tests.dta",clear
+
+. export delimited using "outputs/annual_tests.csv",replace
+(file outputs/annual_tests.csv not found)
+file outputs/annual_tests.csv saved
+
+. display "ANNUAL_TESTS_COMPLETE"
+ANNUAL_TESTS_COMPLETE
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\EE投稿完善_20261030\appendix_models\outputs/p
+> ost_estimation.log
+  log type:  text
+ closed on:  30 Oct 2026, 19:15:55
+-------------------------------------------------------------------------------

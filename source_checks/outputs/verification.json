@@ -1,0 +1,58 @@
+[
+  {
+    "model": "NoConflictZero",
+    "N": 79998,
+    "outcome_and_keys_identical": true,
+    "local_margins": {
+      "pair_id": 1.838821586675695e-15,
+      "ex_year": 1.3883246803080537e-12,
+      "im_year": 9.421961920148663e-13
+    },
+    "score_error": 8.963947043456505e-11,
+    "coefficient_max_difference": 1.7763568394002505e-15,
+    "SE_max_difference": 2.9887203822909214e-13,
+    "passed": true
+  },
+  {
+    "model": "ReporterCoverage",
+    "N": 59879,
+    "outcome_and_keys_identical": true,
+    "local_margins": {
+      "pair_id": 2.0850266504827573e-15,
+      "ex_year": 2.8827636010249554e-14,
+      "im_year": 2.273474518466241e-13
+    },
+    "score_error": 2.2505329956097452e-10,
+    "coefficient_max_difference": 7.771561172376096e-16,
+    "SE_max_difference": 1.0269562977782698e-15,
+    "passed": true
+  },
+  {
+    "model": "WeightAmount",
+    "N": 70256,
+    "outcome_and_keys_identical": true,
+    "local_margins": {
+      "pair_id": 1.9706293457683714e-15,
+      "ex_year": 8.507966617235948e-11,
+      "im_year": 3.4138925191621372e-12
+    },
+    "score_error": 6.091752067360134e-10,
+    "coefficient_max_difference": 1.7763568394002505e-15,
+    "SE_max_difference": 1.0054179711005418e-12,
+    "passed": true
+  },
+  {
+    "model": "WeightKg",
+    "N": 70256,
+    "outcome_and_keys_identical": true,
+    "local_margins": {
+      "pair_id": 1.8786906157268707e-15,
+      "ex_year": 5.903522512534519e-12,
+      "im_year": 5.1623055942739015e-12
+    },
+    "score_error": 5.277879621388905e-10,
+    "coefficient_max_difference": 3.552713678800501e-15,
+    "SE_max_difference": 1.1475265182525618e-12,
+    "passed": true
+  }
+]

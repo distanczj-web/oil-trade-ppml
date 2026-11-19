@@ -1,0 +1,62 @@
+{
+  "models": [
+    {
+      "model": "A",
+      "N": 83563,
+      "regressors": 2,
+      "coefficient_max_difference": 4.4901582452183675e-14,
+      "SE_max_difference": 2.971632995230067e-09,
+      "passed": true
+    },
+    {
+      "model": "B",
+      "N": 83563,
+      "regressors": 2,
+      "coefficient_max_difference": 1.857847209407737e-12,
+      "SE_max_difference": 3.212695975918223e-08,
+      "passed": true
+    },
+    {
+      "model": "C",
+      "N": 83563,
+      "regressors": 3,
+      "coefficient_max_difference": 1.1449174941446927e-13,
+      "SE_max_difference": 4.179488422018096e-09,
+      "passed": true
+    },
+    {
+      "model": "D",
+      "N": 83563,
+      "regressors": 4,
+      "coefficient_max_difference": 2.6689761511988763e-12,
+      "SE_max_difference": 1.4525312952429204e-08,
+      "passed": true
+    },
+    {
+      "model": "M1",
+      "N": 352005,
+      "regressors": 5,
+      "coefficient_max_difference": 4.668487818548783e-14,
+      "SE_max_difference": 9.690214908264494e-09,
+      "passed": true
+    },
+    {
+      "model": "M2",
+      "N": 83563,
+      "regressors": 2,
+      "coefficient_max_difference": 1.5210055437364645e-13,
+      "SE_max_difference": 2.6834366950723165e-09,
+      "passed": true
+    },
+    {
+      "model": "M3",
+      "N": 82760,
+      "regressors": 3,
+      "coefficient_max_difference": 2.936539900133539e-13,
+      "SE_max_difference": 8.760165093324446e-09,
+      "passed": true
+    }
+  ],
+  "input_hashes_unchanged": true,
+  "scope": "Estimation on frozen final supports, not reconstruction from original downloads."
+}

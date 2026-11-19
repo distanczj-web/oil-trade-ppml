@@ -1,0 +1,83 @@
+[
+  {
+    "model": "Baseline",
+    "N": 83563,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": false,
+    "b": -7.617554744585421,
+    "se": 2.3480134,
+    "p": 0.0011775817
+  },
+  {
+    "model": "I3",
+    "N": 80421,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -7.617593113451905,
+    "se": 2.3480527,
+    "p": 0.0011777387
+  },
+  {
+    "model": "I4",
+    "N": 81969,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -7.617510671512437,
+    "se": 2.3480308,
+    "p": 0.0011777583
+  },
+  {
+    "model": "I5",
+    "N": 82745,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -7.617559711519074,
+    "se": 2.3480303,
+    "p": 0.0011776696
+  },
+  {
+    "model": "B3",
+    "N": 65354,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -8.183065034854344,
+    "se": 2.2503059,
+    "p": 0.00027644986
+  },
+  {
+    "model": "B4",
+    "N": 70338,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -8.150617134871242,
+    "se": 2.2504854,
+    "p": 0.00029265636
+  },
+  {
+    "model": "B5",
+    "N": 72854,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -8.116493876290603,
+    "se": 2.2743149,
+    "p": 0.00035866906
+  },
+  {
+    "model": "RoleI3",
+    "N": 83201,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -7.617624529339982,
+    "se": 2.3480265,
+    "p": 0.0011775339
+  },
+  {
+    "model": "RoleB3",
+    "N": 75204,
+    "identical_values_and_regressors": true,
+    "same_keys_on_both_routes": true,
+    "b": -8.182669247574395,
+    "se": 2.2500107,
+    "p": 0.00027612684
+  }
+]

@@ -1,0 +1,232 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\PPML_地缘政治冲击\公开命令复算_1018\full relo
+> cation check\outputs/mirror/run.log
+  log type:  text
+ opened on:  18 Oct 2026, 13:14:58
+
+. sysdir set PLUS `"`project'/ado/"'
+
+. adopath ++ `"`project'/ado"'
+  [1]              "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网
+> 络的供应重构与韧性评估\研究数据及代码\PPML_地缘政治冲击\公开命令复算_1018\ful
+> l relocation check/ado"
+  [2]  (BASE)      "D:\Stata\ado\base/"
+  [3]  (SITE)      "D:\Stata\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\1\ado\personal/"
+  [6]  (PLUS)      "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网
+> 络的供应重构与韧性评估\研究数据及代码\PPML_地缘政治冲击\公开命令复算_1018\ful
+> l relocation check/ado/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. use "data/mirror_2024.dta",clear
+
+. isid ex im year
+
+. assert importvalue>0 & mirrorexportvalue>0
+
+. local oneN=_N
+
+. expand 2,generate(reporter)
+(9,987 observations created)
+
+. gen double stacked_value=cond(reporter==0,importvalue,mirrorexportvalue)
+
+. foreach term in meanpd5_post pri5_post trendpd5_post distance_post2022 {
+  2.     gen double d_`term'=reporter*`term'
+  3. }
+
+. egen long source_pair=group(reporter pair_id)
+
+. egen long source_exyear=group(reporter ex_year)
+
+. egen long source_imyear=group(reporter im_year)
+
+. ppmlhdfe stacked_value meanpd5_post pri5_post trendpd5_post distance_post2022
+>  d_meanpd5_post d_pri5_post d_trendpd5_post d_distance_post2022, absorb(sourc
+> e_pair source_exyear source_imyear) vce(cluster pair_id) tolerance(1e-10) use
+> _exact_solver(1) maxiter(300)
+warning: dependent variable takes very low values after standardizing (1.7668e-
+> 10)
+Iteration 1:   deviance = 6.9029e+12  eps = .         iters = 14   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -4.51  PS  
+Iteration 2:   deviance = 3.7759e+12  eps = 8.28e-01  iters = 13   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -6.28   S  
+Iteration 3:   deviance = 3.2644e+12  eps = 1.57e-01  iters = 12   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) =  -8.48   S  
+Iteration 4:   deviance = 3.1514e+12  eps = 3.59e-02  iters = 12   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -10.61   S  
+Iteration 5:   deviance = 3.1205e+12  eps = 9.92e-03  iters = 11   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -13.29   S  
+Iteration 6:   deviance = 3.1109e+12  eps = 3.08e-03  iters = 10   tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -15.51   S  
+Iteration 7:   deviance = 3.1078e+12  eps = 9.91e-04  iters = 9    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -17.34   S  
+Iteration 8:   deviance = 3.1068e+12  eps = 3.21e-04  iters = 6    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -18.79   S  
+Iteration 9:   deviance = 3.1065e+12  eps = 1.05e-04  iters = 5    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -19.90   S  
+Iteration 10:  deviance = 3.1064e+12  eps = 3.40e-05  iters = 4    tol = 1.0e-0
+> 4                                                                            
+>    min(eta) = -21.68   S  
+Iteration 11:  deviance = 3.1064e+12  eps = 1.14e-05  iters = 12   tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -23.63   S  
+Iteration 12:  deviance = 3.1063e+12  eps = 3.34e-06  iters = 7    tol = 1.0e-0
+> 5                                                                            
+>    min(eta) = -25.50   S  
+Iteration 13:  deviance = 3.1063e+12  eps = 1.16e-06  iters = 20   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -27.19   S  
+Iteration 14:  deviance = 3.1063e+12  eps = 3.09e-07  iters = 22   tol = 1.0e-0
+> 6                                                                            
+>    min(eta) = -28.51   S  
+Iteration 15:  deviance = 3.1063e+12  eps = 8.34e-08  iters = 50   tol = 1.0e-0
+> 7                                                                            
+>    min(eta) = -29.37   S  
+Iteration 16:  deviance = 3.1063e+12  eps = 2.12e-08  iters = 96   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -30.95   S  
+Iteration 17:  deviance = 3.1063e+12  eps = 2.43e-09  iters = 81   tol = 1.0e-0
+> 8                                                                            
+>    min(eta) = -32.07   S  
+Iteration 18:  deviance = 3.1063e+12  eps = 7.23e-09  iters = 142  tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -33.59   S  
+Iteration 19:  deviance = 3.1063e+12  eps = 1.90e-09  iters = 18   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -34.56   S  
+Iteration 20:  deviance = 3.1063e+12  eps = 4.58e-10  iters = 23   tol = 1.0e-0
+> 9                                                                            
+>    min(eta) = -34.85   S  
+Iteration 21:  deviance = 3.1063e+12  eps = 5.85e-11  iters = 4    tol = 1.0e-1
+> 1                                                                            
+>    min(eta) = -34.86   S O
+-------------------------------------------------------------------------------
+> -----------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon 
+> below tolerance)
+Converged in 21 iterations and 571 HDFE sub-iterations (tol = 1.0e-10)
+
+HDFE PPML regression                              No. of obs      =     19,974
+Absorbing 3 HDFE groups                           Residual df     =      1,035
+Statistics robust to heteroskedasticity           Wald chi2(8)    =      20.78
+Deviance             =  3.10634e+12               Prob > chi2     =     0.0078
+Log pseudolikelihood = -1.55317e+12               Pseudo R2       =     0.9592
+
+Number of clusters (pair_id)=      1,036
+                            (Std. err. adjusted for 1,036 clusters in pair_id)
+------------------------------------------------------------------------------
+             |               Robust
+stacked_va~e | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+meanpd5_post |  -.0315852   .0768477    -0.41   0.681    -.1822039    .1190334
+   pri5_post |   2.617493   1.093639     2.39   0.017     .4740009    4.760985
+trendpd5_p~t |  -3.296389   1.086607    -3.03   0.002      -5.4261   -1.166678
+distanc~2022 |   .2088988   .0802199     2.60   0.009     .0516707    .3661269
+d_meanpd5_~t |   .1337692   .0664461     2.01   0.044     .0035373    .2640011
+ d_pri5_post |  -1.596338    .910911    -1.75   0.080    -3.381691    .1890147
+d_trendpd5~t |   1.622141   .9899471     1.64   0.101    -.3181198    3.562402
+d_dista~2022 |  -.1356394    .072791    -1.86   0.062    -.2783072    .0070284
+       _cons |   22.19089   .0827989   268.01   0.000      22.0286    22.35317
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------+
+   Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------+---------------------------------------|
+   source_pair |      2072        2072           0    *|
+ source_exyear |      2378           1        2377     |
+ source_imyear |      2520          50        2470     |
+-------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(N)==2*`oneN' & e(converged)==1
+
+. assert e(sample)==1
+
+. estimates save "outputs/mirror/estimates.ster",replace
+(note: file outputs/mirror/estimates.ster not found)
+file outputs/mirror/estimates.ster saved
+
+. tempname h
+
+. postfile `h' str32 contrast double b double se double p double ci_low double 
+> ci_high long N long pairs using "outputs/mirror/tests.dta",replace
+(file outputs/mirror/tests.dta not found)
+
+. lincom trendpd5_post
+
+ ( 1)  trendpd5_post = 0
+
+------------------------------------------------------------------------------
+stacked_va~e | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.296389   1.086607    -3.03   0.002      -5.4261   -1.166678
+------------------------------------------------------------------------------
+
+. post `h' ("import") (r(estimate)) (r(se)) (r(p)) (r(lb)) (r(ub)) (e(N)) (e(N_
+> clust))
+
+. lincom trendpd5_post+d_trendpd5_post
+
+ ( 1)  trendpd5_post + d_trendpd5_post = 0
+
+------------------------------------------------------------------------------
+stacked_va~e | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.674248   1.087539    -1.54   0.124    -3.805785    .4572888
+------------------------------------------------------------------------------
+
+. post `h' ("export") (r(estimate)) (r(se)) (r(p)) (r(lb)) (r(ub)) (e(N)) (e(N_
+> clust))
+
+. lincom d_trendpd5_post
+
+ ( 1)  d_trendpd5_post = 0
+
+------------------------------------------------------------------------------
+stacked_va~e | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   1.622141   .9899471     1.64   0.101    -.3181198    3.562402
+------------------------------------------------------------------------------
+
+. post `h' ("export_minus_import") (r(estimate)) (r(se)) (r(p)) (r(lb)) (r(ub))
+>  (e(N)) (e(N_clust))
+
+. postclose `h'
+
+. keep ex im year reporter
+
+. save "outputs/mirror/sample_flags.dta",replace
+(file outputs/mirror/sample_flags.dta not found)
+file outputs/mirror/sample_flags.dta saved
+
+. use "outputs/mirror/tests.dta",clear
+
+. export delimited using "outputs/mirror/tests.csv",replace
+(file outputs/mirror/tests.csv not found)
+file outputs/mirror/tests.csv saved
+
+. display "PORTABLE_MIRROR_COMPLETED"
+PORTABLE_MIRROR_COMPLETED
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\PPML_地缘政治冲击\公开命令复算_1018\full relo
+> cation check\outputs/mirror/run.log
+  log type:  text
+ closed on:  18 Oct 2026, 13:15:12
+-------------------------------------------------------------------------------

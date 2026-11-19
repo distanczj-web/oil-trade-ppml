@@ -1,0 +1,86 @@
+[
+  {
+    "group": "baseline_M1",
+    "model": "M1",
+    "terms": "politicaldistance_l1 ln_distance contig comlang_off colony",
+    "candidate": "cand_m1",
+    "outcome": "tradevalue",
+    "fe": "ex_year im_year",
+    "country": "ALL",
+    "input": "data/M1.dta",
+    "N": 352005,
+    "pairs": 28064
+  },
+  {
+    "group": "baseline_M2",
+    "model": "M2",
+    "terms": "pd2021_post2022 distance_post2022",
+    "candidate": "cand_m2",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/M2.dta",
+    "N": 83563,
+    "pairs": 4112
+  },
+  {
+    "group": "baseline_M3",
+    "model": "M3",
+    "terms": "politicaldistance_l1 pdl1_post2022 distance_post2022",
+    "candidate": "cand_m3",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/M3.dta",
+    "N": 82760,
+    "pairs": 4100
+  },
+  {
+    "group": "ABCD",
+    "model": "A",
+    "terms": "meanpd5_post distance_post2022",
+    "candidate": "cand_core",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/ABCD.dta",
+    "N": 83563,
+    "pairs": 4112
+  },
+  {
+    "group": "ABCD",
+    "model": "B",
+    "terms": "pri5_post distance_post2022",
+    "candidate": "cand_core",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/ABCD.dta",
+    "N": 83563,
+    "pairs": 4112
+  },
+  {
+    "group": "ABCD",
+    "model": "C",
+    "terms": "meanpd5_post pri5_post distance_post2022",
+    "candidate": "cand_core",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/ABCD.dta",
+    "N": 83563,
+    "pairs": 4112
+  },
+  {
+    "group": "ABCD",
+    "model": "D",
+    "terms": "meanpd5_post pri5_post trendpd5_post distance_post2022",
+    "candidate": "cand_core",
+    "outcome": "tradevalue",
+    "fe": "pair_id ex_year im_year",
+    "country": "ALL",
+    "input": "data/ABCD.dta",
+    "N": 83563,
+    "pairs": 4112
+  }
+]

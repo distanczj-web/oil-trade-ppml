@@ -1,0 +1,700 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs/run_actual.log
+  log type:  text
+ opened on:   5 Nov 2026, 23:29:56
+
+. do "oil_local_core.do"
+
+. * PRIVATE DERIVATIVE 2026-10-22: extra local-margin stopping criterion only.
+. * Independent Stata/Mata implementation. This is NOT the official ppmlhdfe.
+. * Exact pair-block elimination, normal-equation CG, full-predictor line search.
+. * No Python estimates, fitted values, penalties, or altered outcomes are inputs.
+. mata:
+------------------------------------------------- mata (type end to exit) ----------------------------------------------------------------------------------------------------------
+: mata set matastrict on
+
+: mata set matalnum on
+
+: class OilSystem {
+>     real colvector p,e,i,t,op,oe,oi,mu,root,s0,tc,sv,scale
+>     real matrix ip,ie,ii,x
+>     real rowvector xs
+>     real scalar np,ne,ni,n,total,trend,withx,last_iter,last_error
+>     void setup()
+>     real matrix gs()
+>     void weights()
+>     real colvector pair_project()
+>     real colvector pair_residual()
+>     real colvector z()
+>     real colvector matvec()
+>     real colvector rmatvec()
+>     real colvector normal()
+>     real colvector solve_score()
+>     real scalar score()
+> }
+
+: real matrix OilSystem::gs(real matrix v, real scalar which)
+> {
+>     if (which==1) return(panelsum(v[op,.],ip))
+>     if (which==2) return(panelsum(v[oe,.],ie))
+>     return(panelsum(v[oi,.],ii))
+> }
+
+: void OilSystem::setup(real scalar hastrend)
+> {
+>     p=st_data(. ,"__op_p");e=st_data(. ,"__op_e");i=st_data(. ,"__op_i")
+>     t=(st_data(. ,"year"):-2012)/12
+>     x=st_data(. ,tokens("meanpd5_post pri5_post trendpd5_post distance_post2022"))
+>     n=rows(p);np=max(p);ne=max(e);ni=max(i);trend=hastrend;withx=1
+>     op=order(p,1);oe=order(e,1);oi=order(i,1)
+>     ip=panelsetup(p[op],1);ie=panelsetup(e[oe],1);ii=panelsetup(i[oi],1)
+>     xs=sqrt(quadcolsum((x:-mean(x)):^2)/n)
+>     assert(min(xs)>0);x=x:/xs
+> }
+
+: void OilSystem::weights(real colvector w)
+> {
+>     real colvector anchor,ids,idx,dt,mt,nn
+>     real scalar g,j
+>     mu=w;root=sqrt(mu);s0=gs(mu,1)
+>     assert(min(s0)>0)
+>     anchor=J(np,1,.)
+>     for (g=1;g<=np;g++) {
+>         ids=op[|ip[g,1]\ip[g,2]|]
+>         idx=selectindex(mu[ids]:==max(mu[ids]));j=idx[1]
+>         anchor[g]=t[ids[j]]
+>     }
+>     dt=t-anchor[p];mt=gs(mu:*dt,1):/s0;tc=dt-mt[p]
+>     sv=gs(mu:*tc:^2,1);sv=rowmax((sv,J(np,1,1e-290)))
+>     nn=gs(mu,2)\gs(mu,3)
+>     if (withx) nn=nn\quadcolsum(mu:*x:^2)'
+>     scale=1:/sqrt(rowmax((nn,J(rows(nn),1,1e-290))))
+> }
+
+: real colvector OilSystem::pair_project(real colvector v)
+> {
+>     real colvector a,b,out
+>     a=gs(root:*v,1):/s0;out=v-root:*a[p]
+>     if (trend) {
+>         b=gs(root:*tc:*v,1):/sv
+>         out=out-root:*tc:*b[p]
+>     }
+>     return(out)
+> }
+
+: real colvector OilSystem::pair_residual(real colvector v)
+> {
+>     real colvector a,b,out
+>     a=gs(mu:*v,1):/s0;out=v-a[p]
+>     if (trend) {
+>         b=gs(mu:*tc:*v,1):/sv
+>         out=out-tc:*b[p]
+>     }
+>     return(out)
+> }
+
+: real colvector OilSystem::z(real colvector c)
+> {
+>     real colvector out
+>     out=c[e]+c[ne:+i]
+>     if (withx) out=out+x*c[|ne+ni+1\ne+ni+4|]
+>     return(out)
+> }
+
+: real colvector OilSystem::matvec(real colvector c)
+> {
+>     return(pair_project(root:*z(c:*scale)))
+> }
+
+: real colvector OilSystem::rmatvec(real colvector v)
+> {
+>     real colvector w,out
+>     w=root:*pair_project(v);out=gs(w,2)\gs(w,3)
+>     if (withx) out=out\quadcross(x,w)
+>     return(out:*scale)
+> }
+
+: real colvector OilSystem::normal(real colvector c)
+> {
+>     return(rmatvec(matvec(c)))
+> }
+
+: real colvector OilSystem::solve_score(real colvector resid,real scalar tol)
+> {
+>     real colvector a,b,rr,g,q,r,d,ad
+>     real scalar rho,newrho,den,alpha,k,target
+>     a=gs(resid,1):/s0;rr=resid-mu:*a[p]
+>     if (trend) {
+>         b=gs(resid:*tc,1):/sv
+>         rr=rr-mu:*tc:*b[p]
+>     }
+>     g=gs(rr,2)\gs(rr,3)
+>     if (withx) g=g\quadcross(x,rr)
+>     g=g:*scale
+>     q=J(rows(g),1,0);r=g;d=r;rho=quadcross(r,r)
+>     target=max((1e-14,tol*sqrt(rho)))
+>     last_iter=0
+>     if (sqrt(rho)<=target) {
+>         last_error=sqrt(rho)
+>         return(q)
+>     }
+>     for (k=1;k<=14000;k++) {
+>         ad=normal(d);den=quadcross(d,ad)
+>         if (den<=0 | missing(den)) {
+>             last_error=sqrt(quadcross(g-normal(q),g-normal(q)))
+>             printf("CG_NONPOSITIVE k=%g residual=%g\n",k,last_error)
+>             _error(430)
+>         }
+>         alpha=rho/den;q=q+alpha*d;r=r-alpha*ad
+>         newrho=quadcross(r,r);last_iter=k
+>         if (sqrt(newrho)<=target) break
+>         d=r+(newrho/rho)*d;rho=newrho
+>     }
+>     last_error=sqrt(quadcross(g-normal(q),g-normal(q)))
+>     if (k>14000) {
+>         printf("CG_ITERATION_LIMIT residual=%g\n",last_error)
+>         _error(430)
+>     }
+>     return(q:*scale)
+> }
+
+: real scalar OilSystem::score(real colvector resid)
+> {
+>     real scalar err
+>     err=max(abs(gs(resid,1)\gs(resid,2)\gs(resid,3)\quadcross(x,resid)))
+>     if (trend) err=max((err,max(abs(gs(resid:*t,1)))))
+>     return(err/total)
+> }
+
+: real scalar oil_objective(real colvector eta,real colvector y)
+> {
+>     if (hasmissing(eta) | max(eta)>700) return(.)
+>     return(quadsum(exp(eta)-y:*eta))
+> }
+
+: void oil_fit(real scalar hastrend,real scalar maxiter,string scalar iterfile)
+> {
+>     class OilSystem scalar S
+>     real colvector y,eta,mu,beta,c,other,resid,a,b,step,trial,coef,se
+>     real matrix xr,H,Hi,clusters,V,results
+>     real scalar it,j,alpha,gd,old,newval,err,db,bt,converged,orth,sp_orth,f,localerr
+>     real colvector margin_p,margin_e,margin_i
+>     S=OilSystem();S.setup(hastrend)
+>     y=st_data(. ,"tradevalue")/1e9;S.total=quadsum(y)
+>     beta=J(4,1,0)
+>     eta=ln((S.gs(y,1):/S.gs(J(S.n,1,1),1))[S.p])
+>     margin_p=S.gs(y,1);margin_e=S.gs(y,2);margin_i=S.gs(y,3)
+>     assert(min(margin_p)>0 & min(margin_e)>0 & min(margin_i)>0)
+>     converged=0
+>     f=fopen(iterfile,"w")
+>     fput(f,"iteration,objective,step_fraction,score_relative,max_beta_step,CG_iterations,CG_residual,min_eta,max_eta,local_margin_relative_error")
+>     printf("COLD_START_MATA N=%g pairs=%g trend=%g\n",S.n,S.np,hastrend)
+>     for (it=1;it<=maxiter;it++) {
+>         mu=exp(eta);S.weights(mu)
+>         c=S.solve_score(y-mu,2e-11);other=S.z(c)
+>         resid=y-mu-mu:*other
+>         a=S.gs(resid,1):/S.s0;step=other+a[S.p]
+>         if (hastrend) {
+>             b=S.gs(resid:*S.tc,1):/S.sv
+>             step=step+S.tc:*b[S.p]
+>         }
+>         old=oil_objective(eta,y);gd=quadcross(mu-y,step)
+>         assert(gd<=1e-9*S.total)
+>         alpha=min((1,30/max((30,max(abs(step))))))
+>         for (bt=0;bt<70;bt++) {
+>             trial=eta+alpha*step;newval=oil_objective(trial,y)
+>             if (!missing(newval) & newval<=old+1e-4*alpha*gd+2e-12*S.total) break
+>             alpha=alpha/2
+>         }
+>         if (bt>=70) {
+>             fclose(f)
+>             _error(430)
+>         }
+>         eta=trial;beta=beta+alpha*c[|S.ne+S.ni+1\S.ne+S.ni+4|]
+>         err=S.score(y-exp(eta));db=max(abs(alpha*c[|S.ne+S.ni+1\S.ne+S.ni+4|]:/(S.xs')))
+>         printf("MATA_ITER %g obj=%21.13g alpha=%g score=%g beta_step=%g CG=%g mineta=%g btrend=%g\n",it,newval,alpha,err,db,S.last_iter,min(eta),beta[3]/S.xs[3])
+>         localerr=max(abs(S.gs(y-exp(eta),1)):/margin_p \ abs(S.gs(y-exp(eta),2)):/margin_e \ abs(S.gs(y-exp(eta),3)):/margin_i)
+>         printf("LOCAL_MARGIN_ERROR %g\n",localerr)
+>         fput(f,invtokens(strofreal((it,newval,alpha,err,db,S.last_iter,S.last_error,min(eta),max(eta),localerr),"%24.16g"),","))
+>         if (err<1e-9 & db<1e-6 & abs(old-newval)/S.total<1e-10 & localerr<1e-8) {
+>             converged=1
+>             break
+>         }
+>     }
+>     fclose(f)
+>     st_numscalar("op_local_margin_error",localerr)
+>     st_numscalar("op_converged",converged)
+>     if (!converged) _error(430)
+>     mu=exp(eta);assert(!hasmissing(eta));assert(all(select(mu,y:>0):>0))
+>     S.withx=0;S.weights(mu);xr=J(S.n,4,.)
+>     for (j=1;j<=4;j++) {
+>         c=S.solve_score(mu:*S.x[,j],2e-12)
+>         xr[,j]=S.pair_residual(S.x[,j]-S.z(c))
+>         printf("MATA_INFERENCE term=%g CG=%g residual=%g\n",j,S.last_iter,S.last_error)
+>     }
+>     H=quadcross(xr,mu,xr);Hi=invsym(H);assert(all(diagonal(Hi):>0))
+>     printf("MATA_COV H=%gx%g Hi=%gx%g xs=%gx%g\n",rows(H),cols(H),rows(Hi),cols(Hi),rows(S.xs),cols(S.xs))
+>     clusters=S.gs((y-mu):*xr,1)
+>     printf("MATA_COV cluster_scores=%gx%g\n",rows(clusters),cols(clusters))
+>     V=diag(1:/S.xs')*Hi*quadcross(clusters,clusters)*Hi*diag(1:/S.xs')*(S.np/(S.np-1))
+>     printf("MATA_COV V=%gx%g\n",rows(V),cols(V))
+>     printf("MATA_COV beta=%gx%g\n",rows(beta),cols(beta))
+>     coef=beta:/(S.xs')
+>     printf("MATA_OUTPUT coef=%gx%g\n",rows(coef),cols(coef))
+>     se=sqrt(diagonal(V))
+>     printf("MATA_OUTPUT se=%gx%g\n",rows(se),cols(se))
+>     assert(!hasmissing(V));assert(min(se)>0)
+>     st_matrix("op_B",coef');st_matrix("op_V",V)
+>     printf("MATA_OUTPUT matrices_saved\n")
+>     results=(coef,se,2*normal(-abs(coef:/se)),coef-1.95996398454*se,coef+1.95996398454*se)
+>     printf("MATA_OUTPUT result_table_saved\n")
+>     st_matrix("op_results",results)
+>     printf("MATA_OUTPUT observations=%g eta=%gx%g mu=%gx%g indices=%g,%g\n",st_nobs(),rows(eta),cols(eta),rows(mu),cols(mu),st_varindex("op_eta"),st_varindex("op_mu"))
+>     st_store((1::S.n),st_varindex("op_eta"),eta:+ln(1e9))
+>     st_store((1::S.n),st_varindex("op_mu"),mu:*1e9)
+>     st_numscalar("op_N",S.n);st_numscalar("op_pairs",S.np);st_numscalar("op_iterations",it)
+>     st_numscalar("op_score",S.score(y-mu));st_numscalar("op_objective",oil_objective(eta,y))
+>     orth=0;sp_orth=0
+>     for (j=1;j<=4;j++) {
+>         orth=max((orth,max(abs(S.gs(mu:*xr[,j],1)\S.gs(mu:*xr[,j],2)\S.gs(mu:*xr[,j],3)))/S.total))
+>         if (hastrend) sp_orth=max((sp_orth,max(abs(S.gs(mu:*S.t:*xr[,j],1)))/S.total))
+>     }
+>     st_numscalar("op_orth",orth);st_numscalar("op_slope_orth",sp_orth)
+>     assert(orth<1e-8 & sp_orth<1e-8)
+>     printf("MATA_COMPLETED converged=1 score=%g orth=%g slope_orth=%g\n",S.score(y-mu),orth,sp_orth)
+> }
+
+: end
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+. 
+. capture program drop oil_sparse_ppml
+
+. program define oil_sparse_ppml,eclass
+  1.     version 17
+  2.     syntax , TREND(integer) [MAXIter(integer 120)]
+  3.     tempvar sample
+  4.     tempfile iterfile
+  5.     gen byte `sample'=1
+  6.     mata: oil_fit(`trend',`maxiter',st_local("iterfile"))
+  7.     copy "`iterfile'" "iterations.csv",replace
+  8.     matrix colnames op_B=meanpd5_post pri5_post trendpd5_post distance_post2022
+  9.     matrix colnames op_V=meanpd5_post pri5_post trendpd5_post distance_post2022
+ 10.     matrix rownames op_V=meanpd5_post pri5_post trendpd5_post distance_post2022
+ 11.     ereturn post op_B op_V,esample(`sample') obs(`=scalar(op_N)')
+ 12.     ereturn scalar converged=scalar(op_converged)
+ 13.     ereturn scalar N_clust=scalar(op_pairs)
+ 14.     ereturn scalar ic=scalar(op_iterations)
+ 15.     ereturn scalar score_relative=scalar(op_score)
+ 16.     ereturn scalar local_margin_relative_error=scalar(op_local_margin_error)
+ 17.     ereturn scalar FE_orthogonality=scalar(op_orth)
+ 18.     ereturn scalar slope_orthogonality=scalar(op_slope_orth)
+ 19.     ereturn local cmd "oil_sparse_ppml"
+ 20.     ereturn local title "Independent Stata/Mata PPML numerical verification"
+ 21.     ereturn local vce "cluster"
+ 22.     ereturn local clustvar "pair_id"
+ 23.     ereturn display
+ 24. end
+
+. 
+end of do-file
+
+. local models "NoConflictZero ReporterCoverage WeightAmount WeightKg"
+
+. 
+. foreach model in `models' {
+  2.     use "data/`model'.dta",clear
+  3.     isid ex im year
+  4.     egen long __op_p=group(pair_id)
+  5.     egen long __op_e=group(ex_year)
+  6.     egen long __op_i=group(im_year)
+  7.     gen double op_eta=.
+  8.     gen double op_mu=.
+  9.     capture mkdir "outputs/`model'"
+ 10.     cd "outputs/`model'"
+ 11.     oil_sparse_ppml,trend(0) maxiter(150)
+ 12.     assert e(N)==_N & e(converged)==1 & e(local_margin_relative_error)<1e-8
+ 13.     assert e(sample)==1
+ 14.     estimates save "estimates.ster",replace
+ 15.     matrix FullV=e(V)
+ 16.     tempname result
+ 17.     postfile `result' str32 term double(b se p) long N using "coefficients.dta",replace
+ 18.     foreach term in meanpd5_post pri5_post trendpd5_post distance_post2022 {
+ 19.         post `result' ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N))
+ 20.     }
+ 21.     postclose `result'
+ 22.     preserve
+ 23.     save "analysis_ready.dta",replace
+ 24.     restore
+ 25.     clear
+ 26.     svmat double FullV,names(col)
+ 27.     save "covariance.dta",replace
+ 28.     cd `"`project'"'
+ 29. }
+(79,998 missing values generated)
+(79,998 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs\NoConflictZero
+COLD_START_MATA N=79998 pairs=4107 trend=0
+MATA_ITER 1 obj=      -16301.72067375 alpha=.5 score=.072145124 beta_step=5.3515937 CG=68 mineta=-27.2287451 btrend=-5.3515937
+LOCAL_MARGIN_ERROR 97922189.2
+MATA_ITER 2 obj=      -18431.57751255 alpha=1 score=.030641531 beta_step=1.55240476 CG=100 mineta=-28.2518464 btrend=-6.90399846
+LOCAL_MARGIN_ERROR 37049253.7
+MATA_ITER 3 obj=      -18938.20488357 alpha=1 score=.007374162 beta_step=.487505006 CG=102 mineta=-29.8140202 btrend=-7.39150346
+LOCAL_MARGIN_ERROR 13730734.9
+MATA_ITER 4 obj=      -19071.57591432 alpha=1 score=.00218989 beta_step=.142992833 CG=99 mineta=-32.2044343 btrend=-7.5344963
+LOCAL_MARGIN_ERROR 5055098.47
+MATA_ITER 5 obj=      -19107.88567665 alpha=1 score=.000615866 beta_step=.021583134 CG=98 mineta=-34.9063572 btrend=-7.55607943
+LOCAL_MARGIN_ERROR 1859867.66
+MATA_ITER 6 obj=      -19118.25505249 alpha=1 score=.000137843 beta_step=.001486786 CG=111 mineta=-37.6947462 btrend=-7.55756622
+LOCAL_MARGIN_ERROR 684229.971
+MATA_ITER 7 obj=      -19121.41036503 alpha=1 score=.000049632 beta_step=.000055655 CG=125 mineta=-40.4384938 btrend=-7.5576109
+LOCAL_MARGIN_ERROR 251716.989
+MATA_ITER 8 obj=      -19122.46625612 alpha=1 score=.00001815 beta_step=4.5711e-06 CG=159 mineta=-42.9504514 btrend=-7.55761331
+LOCAL_MARGIN_ERROR 92601.7036
+MATA_ITER 9 obj=      -19122.83658277 alpha=1 score=6.6280e-06 beta_step=5.3520e-07 CG=168 mineta=-45.1307019 btrend=-7.55761385
+LOCAL_MARGIN_ERROR 34066.1046
+MATA_ITER 10 obj=      -19122.96559936 alpha=1 score=2.3936e-06 beta_step=2.2018e-07 CG=179 mineta=-47.1381984 btrend=-7.55761407
+LOCAL_MARGIN_ERROR 12532.0135
+MATA_ITER 11 obj=      -19123.00860497 alpha=1 score=8.3634e-07 beta_step=1.0531e-07 CG=194 mineta=-49.1128527 btrend=-7.55761417
+LOCAL_MARGIN_ERROR 4610.05772
+MATA_ITER 12 obj=      -19123.02157719 alpha=1 score=2.6686e-07 beta_step=5.4476e-08 CG=221 mineta=-51.0467938 btrend=-7.55761423
+LOCAL_MARGIN_ERROR 1695.73138
+MATA_ITER 13 obj=      -19123.02462174 alpha=1 score=6.6207e-08 beta_step=1.3522e-08 CG=235 mineta=-52.8738483 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 623.608095
+MATA_ITER 14 obj=      -19123.02506787 alpha=1 score=1.0657e-08 beta_step=3.2954e-09 CG=246 mineta=-54.4432381 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 229.189918
+MATA_ITER 15 obj=      -19123.02512729 alpha=1 score=2.8724e-09 beta_step=1.3741e-10 CG=253 mineta=-55.5074329 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 84.0792076
+MATA_ITER 16 obj=      -19123.02514013 alpha=1 score=4.9552e-10 beta_step=2.3129e-10 CG=262 mineta=-55.9456118 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 30.6799781
+MATA_ITER 17 obj=       -19123.0251431 alpha=1 score=5.0650e-11 beta_step=2.6826e-10 CG=264 mineta=-56.0201175 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 11.0295529
+MATA_ITER 18 obj=      -19123.02514386 alpha=1 score=1.0063e-11 beta_step=1.1690e-10 CG=262 mineta=-56.0226137 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 3.80906611
+MATA_ITER 19 obj=      -19123.02514404 alpha=1 score=1.7856e-12 beta_step=1.6295e-11 CG=260 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 1.17807962
+MATA_ITER 20 obj=      -19123.02514407 alpha=1 score=4.0644e-13 beta_step=6.4468e-13 CG=190 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR .268155674
+MATA_ITER 21 obj=      -19123.02514407 alpha=1 score=4.0097e-14 beta_step=5.2546e-15 CG=60 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR .026454203
+MATA_ITER 22 obj=      -19123.02514407 alpha=1 score=5.1228e-16 beta_step=1.1564e-15 CG=52 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR .000337985
+MATA_ITER 23 obj=      -19123.02514407 alpha=1 score=1.6430e-17 beta_step=9.9056e-15 CG=11 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 5.7091e-08
+MATA_ITER 24 obj=      -19123.02514407 alpha=1 score=1.4621e-17 beta_step=5.7192e-16 CG=2 mineta=-56.0226168 btrend=-7.55761424
+LOCAL_MARGIN_ERROR 1.3883e-12
+MATA_INFERENCE term=1 CG=260 residual=2.9795e-10
+MATA_INFERENCE term=2 CG=253 residual=3.3143e-10
+MATA_INFERENCE term=3 CG=261 residual=1.7843e-10
+MATA_INFERENCE term=4 CG=254 residual=3.3941e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=4107x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=79998 eta=79998x1 mu=79998x1 indices=15,16
+MATA_COMPLETED converged=1 score=1.4621e-17 orth=1.9121e-14 slope_orth=0
+(file iterations.csv not found)
+                                 (Std. err. adjusted for 4,107 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |  -.0123055    .101695    -0.12   0.904     -.211624     .187013
+        pri5_post |   1.179494   .8988835     1.31   0.189    -.5822851    2.941273
+    trendpd5_post |  -7.557614   2.281483    -3.31   0.001    -12.02924   -3.085989
+distance_post2022 |   .1121255   .0945219     1.19   0.236     -.073134     .297385
+-----------------------------------------------------------------------------------
+(note: file estimates.ster not found)
+file estimates.ster saved
+(file coefficients.dta not found)
+(file analysis_ready.dta not found)
+file analysis_ready.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(file covariance.dta not found)
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks
+(59,879 missing values generated)
+(59,879 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs\ReporterCoverage
+COLD_START_MATA N=59879 pairs=3293 trend=0
+MATA_ITER 1 obj=      -7379.736795284 alpha=.5 score=.059075095 beta_step=2.71765451 CG=82 mineta=-26.3943271 btrend=-2.71765451
+LOCAL_MARGIN_ERROR 116897573
+MATA_ITER 2 obj=       -8555.24371343 alpha=1 score=.018765191 beta_step=.497030426 CG=98 mineta=-27.6158536 btrend=-3.21468494
+LOCAL_MARGIN_ERROR 43256808
+MATA_ITER 3 obj=      -8815.459283927 alpha=1 score=.002810391 beta_step=.102203504 CG=104 mineta=-29.5229694 btrend=-3.27378996
+LOCAL_MARGIN_ERROR 15948885
+MATA_ITER 4 obj=      -8880.453626133 alpha=1 score=.000736861 beta_step=.121726743 CG=108 mineta=-32.5833433 btrend=-3.26182809
+LOCAL_MARGIN_ERROR 5868391.23
+MATA_ITER 5 obj=      -8896.943930155 alpha=1 score=.000266006 beta_step=.029362624 CG=113 mineta=-35.2359302 btrend=-3.27068345
+LOCAL_MARGIN_ERROR 2158865.91
+MATA_ITER 6 obj=      -8901.494000532 alpha=1 score=.000097289 beta_step=.002875408 CG=127 mineta=-37.5590203 btrend=-3.27307856
+LOCAL_MARGIN_ERROR 794203.533
+MATA_ITER 7 obj=      -8902.846870743 alpha=1 score=.000035366 beta_step=.000099059 CG=134 mineta=-39.6972764 btrend=-3.27317762
+LOCAL_MARGIN_ERROR 292171.373
+MATA_ITER 8 obj=      -8903.270476516 alpha=1 score=.000012787 beta_step=6.8631e-06 CG=150 mineta=-41.78447 btrend=-3.27317926
+LOCAL_MARGIN_ERROR 107483.638
+MATA_ITER 9 obj=      -8903.413988323 alpha=1 score=4.6116e-06 beta_step=4.0263e-06 CG=170 mineta=-43.7575705 btrend=-3.27318171
+LOCAL_MARGIN_ERROR 39540.7627
+MATA_ITER 10 obj=      -8903.463089944 alpha=1 score=1.6246e-06 beta_step=2.0055e-06 CG=190 mineta=-45.5663189 btrend=-3.27318372
+LOCAL_MARGIN_ERROR 14545.9703
+MATA_ITER 11 obj=       -8903.47851832 alpha=1 score=5.3074e-07 beta_step=1.3331e-06 CG=202 mineta=-48.0802098 btrend=-3.27318505
+LOCAL_MARGIN_ERROR 5350.89926
+MATA_ITER 12 obj=      -8903.482387274 alpha=1 score=1.4070e-07 beta_step=6.4156e-07 CG=227 mineta=-51.6082175 btrend=-3.27318569
+LOCAL_MARGIN_ERROR 1968.22163
+MATA_ITER 13 obj=      -8903.482989965 alpha=1 score=2.0926e-08 beta_step=2.2465e-07 CG=233 mineta=-55.1231395 btrend=-3.27318592
+LOCAL_MARGIN_ERROR 723.804125
+MATA_ITER 14 obj=      -8903.483057104 alpha=1 score=1.1110e-09 beta_step=5.4779e-08 CG=244 mineta=-58.3207281 btrend=-3.27318597
+LOCAL_MARGIN_ERROR 266.00867
+MATA_ITER 15 obj=      -8903.483070466 alpha=1 score=2.7610e-10 beta_step=9.1019e-09 CG=252 mineta=-60.7583522 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 97.5955695
+MATA_ITER 16 obj=      -8903.483073125 alpha=1 score=5.3242e-11 beta_step=1.0710e-09 CG=273 mineta=-62.2346164 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 35.6410344
+MATA_ITER 17 obj=      -8903.483073573 alpha=1 score=5.9268e-12 beta_step=1.1026e-10 CG=274 mineta=-63.1675315 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 12.8524287
+MATA_ITER 18 obj=      -8903.483073644 alpha=1 score=1.5678e-12 beta_step=4.6880e-12 CG=272 mineta=-63.8672551 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 4.47750707
+MATA_ITER 19 obj=      -8903.483073653 alpha=1 score=2.4525e-13 beta_step=2.6022e-14 CG=254 mineta=-64.2616387 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 1.41866295
+MATA_ITER 20 obj=      -8903.483073653 alpha=1 score=2.6347e-14 beta_step=1.5775e-15 CG=249 mineta=-64.363225 btrend=-3.27318598
+LOCAL_MARGIN_ERROR .34536649
+MATA_ITER 21 obj=      -8903.483073653 alpha=1 score=3.1100e-15 beta_step=7.3751e-16 CG=124 mineta=-64.368748 btrend=-3.27318598
+LOCAL_MARGIN_ERROR .040767424
+MATA_ITER 22 obj=      -8903.483073653 alpha=1 score=6.0123e-17 beta_step=6.9842e-15 CG=15 mineta=-64.3687633 btrend=-3.27318598
+LOCAL_MARGIN_ERROR .000788117
+MATA_ITER 23 obj=      -8903.483073653 alpha=1 score=1.6760e-17 beta_step=2.0357e-15 CG=8 mineta=-64.3687633 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 3.1024e-07
+MATA_ITER 24 obj=      -8903.483073653 alpha=1 score=2.3524e-17 beta_step=4.1627e-16 CG=2 mineta=-64.3687633 btrend=-3.27318598
+LOCAL_MARGIN_ERROR 2.2735e-13
+MATA_INFERENCE term=1 CG=267 residual=2.0232e-10
+MATA_INFERENCE term=2 CG=264 residual=1.9317e-10
+MATA_INFERENCE term=3 CG=269 residual=1.1656e-10
+MATA_INFERENCE term=4 CG=263 residual=2.6278e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=3293x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=59879 eta=59879x1 mu=59879x1 indices=15,16
+MATA_COMPLETED converged=1 score=2.3524e-17 orth=2.4069e-14 slope_orth=0
+(file iterations.csv not found)
+                                 (Std. err. adjusted for 3,293 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |  -.0389913   .0730809    -0.53   0.594    -.1822272    .1042446
+        pri5_post |   1.961868   1.115461     1.76   0.079    -.2243943    4.148131
+    trendpd5_post |  -3.273186    1.03376    -3.17   0.002    -5.299318   -1.247054
+distance_post2022 |     .16871   .0766491     2.20   0.028     .0184807    .3189394
+-----------------------------------------------------------------------------------
+(note: file estimates.ster not found)
+file estimates.ster saved
+(file coefficients.dta not found)
+(file analysis_ready.dta not found)
+file analysis_ready.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(file covariance.dta not found)
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks
+(70,256 missing values generated)
+(70,256 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs\WeightAmount
+COLD_START_MATA N=70256 pairs=3791 trend=0
+MATA_ITER 1 obj=      -12788.91328772 alpha=.490747312 score=.08035865 beta_step=5.77676199 CG=74 mineta=-26.7473351 btrend=-5.77676199
+LOCAL_MARGIN_ERROR 106855541
+MATA_ITER 2 obj=      -14625.98002988 alpha=1 score=.029714422 beta_step=2.31605724 CG=104 mineta=-28.3578999 btrend=-8.09281923
+LOCAL_MARGIN_ERROR 40293575.4
+MATA_ITER 3 obj=      -15064.48530476 alpha=1 score=.005142411 beta_step=.683374606 CG=98 mineta=-30.417173 btrend=-8.77619384
+LOCAL_MARGIN_ERROR 15039782.2
+MATA_ITER 4 obj=      -15184.34911317 alpha=1 score=.001618109 beta_step=.161530652 CG=97 mineta=-32.8491329 btrend=-8.93772449
+LOCAL_MARGIN_ERROR 5548439.73
+MATA_ITER 5 obj=      -15219.64546923 alpha=1 score=.000588237 beta_step=.006500216 CG=106 mineta=-35.6142411 btrend=-8.94397239
+LOCAL_MARGIN_ERROR 2041641.36
+MATA_ITER 6 obj=      -15230.69296273 alpha=1 score=.000215277 beta_step=.000676692 CG=139 mineta=-39.3920887 btrend=-8.9432957
+LOCAL_MARGIN_ERROR 751088.294
+MATA_ITER 7 obj=      -15234.27841053 alpha=1 score=.000078823 beta_step=.000059696 CG=168 mineta=-43.2461207 btrend=-8.943236
+LOCAL_MARGIN_ERROR 276309.826
+MATA_ITER 8 obj=      -15235.50432783 alpha=1 score=.000028763 beta_step=8.5632e-07 CG=221 mineta=-47.0114773 btrend=-8.94323686
+LOCAL_MARGIN_ERROR 101648.441
+MATA_ITER 9 obj=      -15235.94124354 alpha=1 score=.000010477 beta_step=9.0547e-07 CG=252 mineta=-50.4833502 btrend=-8.94323705
+LOCAL_MARGIN_ERROR 37394.1075
+MATA_ITER 10 obj=       -15236.0973146 alpha=1 score=3.8016e-06 beta_step=4.6075e-07 CG=279 mineta=-53.372424 btrend=-8.94323683
+LOCAL_MARGIN_ERROR 13756.2591
+MATA_ITER 11 obj=      -15236.15142871 alpha=1 score=1.3471e-06 beta_step=1.4542e-07 CG=307 mineta=-55.5017097 btrend=-8.94323669
+LOCAL_MARGIN_ERROR 5060.38069
+MATA_ITER 12 obj=        -15236.168678 alpha=1 score=4.4725e-07 beta_step=3.7345e-08 CG=324 mineta=-56.9740705 btrend=-8.94323665
+LOCAL_MARGIN_ERROR 1861.34582
+MATA_ITER 13 obj=      -15236.17317546 alpha=1 score=1.2401e-07 beta_step=9.9939e-09 CG=340 mineta=-58.0728749 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 684.486716
+MATA_ITER 14 obj=      -15236.17392464 alpha=1 score=2.0860e-08 beta_step=1.5412e-09 CG=351 mineta=-59.0731357 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 251.544618
+MATA_ITER 15 obj=      -15236.17400162 alpha=1 score=3.3573e-09 beta_step=1.4034e-09 CG=359 mineta=-60.0564526 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 92.2745817
+MATA_ITER 16 obj=       -15236.1740154 alpha=1 score=5.8092e-10 beta_step=8.9733e-10 CG=386 mineta=-60.985285 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 33.6836595
+MATA_ITER 17 obj=      -15236.17401879 alpha=1 score=6.2426e-11 beta_step=4.9007e-10 CG=395 mineta=-61.6754952 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 12.1326394
+MATA_ITER 18 obj=      -15236.17401969 alpha=1 score=1.2965e-11 beta_step=3.4787e-10 CG=400 mineta=-61.8786632 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 4.21347617
+MATA_ITER 19 obj=      -15236.17401991 alpha=1 score=2.0920e-12 beta_step=3.6261e-10 CG=394 mineta=-61.8870343 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 1.32345998
+MATA_ITER 20 obj=      -15236.17401994 alpha=1 score=4.7422e-13 beta_step=1.1920e-10 CG=362 mineta=-61.8870518 btrend=-8.94323664
+LOCAL_MARGIN_ERROR .314491704
+MATA_ITER 21 obj=      -15236.17401994 alpha=1 score=4.6203e-14 beta_step=1.8324e-11 CG=329 mineta=-61.8870518 btrend=-8.94323664
+LOCAL_MARGIN_ERROR .034791944
+MATA_ITER 22 obj=      -15236.17401994 alpha=1 score=5.7370e-16 beta_step=2.0484e-12 CG=319 mineta=-61.8870518 btrend=-8.94323664
+LOCAL_MARGIN_ERROR .00057839
+MATA_ITER 23 obj=      -15236.17401994 alpha=1 score=1.1063e-17 beta_step=3.2865e-15 CG=311 mineta=-61.8870518 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 1.6714e-07
+MATA_ITER 24 obj=      -15236.17401994 alpha=1 score=6.5166e-18 beta_step=6.6915e-17 CG=5 mineta=-61.8870518 btrend=-8.94323664
+LOCAL_MARGIN_ERROR 8.5080e-11
+MATA_INFERENCE term=1 CG=394 residual=2.9017e-10
+MATA_INFERENCE term=2 CG=384 residual=3.2558e-10
+MATA_INFERENCE term=3 CG=394 residual=2.1042e-10
+MATA_INFERENCE term=4 CG=380 residual=4.0907e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=3791x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=70256 eta=70256x1 mu=70256x1 indices=15,16
+MATA_COMPLETED converged=1 score=6.5166e-18 orth=2.2062e-14 slope_orth=0
+(file iterations.csv not found)
+                                 (Std. err. adjusted for 3,791 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |   .0559129   .1029763     0.54   0.587     -.145917    .2577427
+        pri5_post |    .930975   .9610292     0.97   0.333    -.9526077    2.814558
+    trendpd5_post |  -8.943237   3.104623    -2.88   0.004    -15.02819   -2.858288
+distance_post2022 |   .0920325    .111588     0.82   0.410     -.126676    .3107411
+-----------------------------------------------------------------------------------
+(note: file estimates.ster not found)
+file estimates.ster saved
+(file coefficients.dta not found)
+(file analysis_ready.dta not found)
+file analysis_ready.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(file covariance.dta not found)
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks
+(70,256 missing values generated)
+(70,256 missing values generated)
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs\WeightKg
+COLD_START_MATA N=70256 pairs=3791 trend=0
+MATA_ITER 1 obj=      -53842.82659527 alpha=.5 score=.113972685 beta_step=5.53773952 CG=77 mineta=-27.106396 btrend=-5.53773952
+LOCAL_MARGIN_ERROR 1.9363e+09
+MATA_ITER 2 obj=      -56516.56986008 alpha=1 score=.044645786 beta_step=2.30546731 CG=107 mineta=-30.6265822 btrend=-7.84320682
+LOCAL_MARGIN_ERROR 763588028
+MATA_ITER 3 obj=        -57102.934558 alpha=1 score=.010876396 beta_step=.621530278 CG=104 mineta=-33.9041965 btrend=-8.4647371
+LOCAL_MARGIN_ERROR 289207223
+MATA_ITER 4 obj=      -57227.85864773 alpha=1 score=.002437744 beta_step=.269833164 CG=108 mineta=-36.9058198 btrend=-8.73457027
+LOCAL_MARGIN_ERROR 107004336
+MATA_ITER 5 obj=      -57255.44244805 alpha=1 score=.000555986 beta_step=.07245459 CG=120 mineta=-39.7591751 btrend=-8.78503273
+LOCAL_MARGIN_ERROR 39375494.6
+MATA_ITER 6 obj=      -57261.91719153 alpha=1 score=.00015936 beta_step=.004749981 CG=147 mineta=-42.5866246 btrend=-8.78815906
+LOCAL_MARGIN_ERROR 14485480.9
+MATA_ITER 7 obj=       -57263.5563713 alpha=1 score=.000050913 beta_step=.000072079 CG=170 mineta=-45.0208532 btrend=-8.78823114
+LOCAL_MARGIN_ERROR 5328910.62
+MATA_ITER 8 obj=      -57264.03562864 alpha=1 score=.000018126 beta_step=3.4494e-06 CG=225 mineta=-48.1940059 btrend=-8.78823438
+LOCAL_MARGIN_ERROR 1960396.53
+MATA_ITER 9 obj=      -57264.19540242 alpha=1 score=6.5914e-06 beta_step=1.4946e-06 CG=256 mineta=-50.5569359 btrend=-8.7882336
+LOCAL_MARGIN_ERROR 721189.671
+MATA_ITER 10 obj=      -57264.21743569 alpha=.406474813 score=4.8083e-06 beta_step=2.5125e-07 CG=294 mineta=-55.9243223 btrend=-8.78823341
+LOCAL_MARGIN_ERROR 480308.118
+MATA_ITER 11 obj=      -57264.25821993 alpha=1 score=1.7126e-06 beta_step=4.6587e-07 CG=351 mineta=-57.8374352 btrend=-8.78823305
+LOCAL_MARGIN_ERROR 176696.619
+MATA_ITER 12 obj=      -57264.27201962 alpha=1 score=5.8281e-07 beta_step=1.0946e-07 CG=389 mineta=-59.150341 btrend=-8.78823294
+LOCAL_MARGIN_ERROR 65006.3507
+MATA_ITER 13 obj=      -57264.27642696 alpha=1 score=1.7817e-07 beta_step=3.1575e-08 CG=422 mineta=-59.8228974 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 23922.2526
+MATA_ITER 14 obj=      -57264.27776067 alpha=1 score=4.6758e-08 beta_step=5.2144e-09 CG=467 mineta=-62.3851642 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 8813.34341
+MATA_ITER 15 obj=      -57264.27817512 alpha=1 score=1.2919e-08 beta_step=1.5816e-09 CG=498 mineta=-64.5235786 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 3254.19035
+MATA_ITER 16 obj=      -57264.27830298 alpha=1 score=3.8089e-09 beta_step=1.5154e-09 CG=530 mineta=-65.9657299 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 1204.37516
+MATA_ITER 17 obj=      -57264.27834016 alpha=1 score=9.0504e-10 beta_step=1.2315e-09 CG=558 mineta=-66.7899531 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 447.004096
+MATA_ITER 18 obj=      -57264.27835128 alpha=1 score=1.9377e-10 beta_step=8.4663e-10 CG=564 mineta=-67.0284246 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 166.53238
+MATA_ITER 19 obj=      -57264.27835471 alpha=1 score=5.8260e-11 beta_step=5.3588e-10 CG=572 mineta=-67.035395 btrend=-8.78823291
+LOCAL_MARGIN_ERROR 62.3151107
+MATA_ITER 20 obj=      -57264.27835564 alpha=1 score=1.6698e-11 beta_step=3.1937e-10 CG=500 mineta=-67.035401 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 23.382916
+MATA_ITER 21 obj=      -57264.27835584 alpha=1 score=3.2857e-12 beta_step=1.7750e-10 CG=575 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 8.71954817
+MATA_ITER 22 obj=      -57264.27835587 alpha=1 score=3.9649e-13 beta_step=9.8177e-11 CG=495 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 3.13799146
+MATA_ITER 23 obj=      -57264.27835588 alpha=1 score=7.8048e-14 beta_step=5.0980e-11 CG=400 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 1.00581198
+MATA_ITER 24 obj=      -57264.27835588 alpha=1 score=2.4230e-14 beta_step=1.8320e-11 CG=355 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR .232783735
+MATA_ITER 25 obj=      -57264.27835588 alpha=1 score=2.8481e-15 beta_step=4.1639e-12 CG=386 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR .022658386
+MATA_ITER 26 obj=      -57264.27835588 alpha=1 score=4.1554e-17 beta_step=4.5607e-13 CG=421 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR .000275357
+MATA_ITER 27 obj=      -57264.27835588 alpha=1 score=8.5380e-18 beta_step=3.2169e-15 CG=412 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 4.1922e-08
+MATA_ITER 28 obj=      -57264.27835588 alpha=1 score=1.1948e-17 beta_step=1.8458e-15 CG=12 mineta=-67.0354011 btrend=-8.7882329
+LOCAL_MARGIN_ERROR 5.9035e-12
+MATA_INFERENCE term=1 CG=521 residual=3.8021e-10
+MATA_INFERENCE term=2 CG=519 residual=2.7403e-10
+MATA_INFERENCE term=3 CG=606 residual=2.3592e-10
+MATA_INFERENCE term=4 CG=494 residual=5.4648e-10
+MATA_COV H=4x4 Hi=4x4 xs=1x4
+MATA_COV cluster_scores=3791x4
+MATA_COV V=4x4
+MATA_COV beta=4x1
+MATA_OUTPUT coef=4x1
+MATA_OUTPUT se=4x1
+MATA_OUTPUT matrices_saved
+MATA_OUTPUT result_table_saved
+MATA_OUTPUT observations=70256 eta=70256x1 mu=70256x1 indices=15,16
+MATA_COMPLETED converged=1 score=1.1948e-17 orth=2.0620e-14 slope_orth=0
+(file iterations.csv not found)
+                                 (Std. err. adjusted for 3,791 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |   .0181164   .1003459     0.18   0.857     -.178558    .2147907
+        pri5_post |   .8245631   1.055126     0.78   0.435    -1.243445    2.892571
+    trendpd5_post |  -8.788233   3.143961    -2.80   0.005    -14.95028   -2.626182
+distance_post2022 |   .0909921   .1087978     0.84   0.403    -.1222477    .3042319
+-----------------------------------------------------------------------------------
+(note: file estimates.ster not found)
+file estimates.ster saved
+(file coefficients.dta not found)
+(file analysis_ready.dta not found)
+file analysis_ready.dta saved
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(file covariance.dta not found)
+file covariance.dta saved
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks
+
+. display "LOCAL_MARGIN_RUN_COMPLETED `mode'"
+LOCAL_MARGIN_RUN_COMPLETED actual
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\source_checks\outputs/run_actual.log
+  log type:  text
+ closed on:   5 Nov 2026, 23:36:14
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

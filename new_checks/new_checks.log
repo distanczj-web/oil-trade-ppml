@@ -1,0 +1,158 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 2-core  perpetual
+Serial number: 501806366047
+  Licensed to: distancezj
+               Shanghai
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与
+> 韧性评估\研究数据及代码\原版复验_20261105\new_checks\finish.do C:\Users\1\Des
+> ktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据
+> 及代码\原版复验_20261105\new_checks 
+
+. version 17
+
+. args root
+
+. cd `"`root'"'
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks
+
+. do `"`root'/compare_dimensions.do"' `"`root'"'
+
+. version 17
+
+. args root
+
+. if `"`root'"'=="" local root `"`c(pwd)'"'
+
+. clear all
+
+. set more off
+
+. cd `"`root'"'
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评
+> 估\研究数据及代码\原版复验_20261105\new_checks
+
+. capture mkdir "维度比较"
+
+. log using "维度比较/run.log",text replace
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks\维度比较/run.log
+  log type:  text
+ opened on:   5 Nov 2026, 23:35:27
+
+. local source "stored_estimates"
+
+. tempname h
+
+. postfile `h' str12 model str40 comparison double p statistic df N ll using "
+> 维度比较/joint_tests.dta",replace
+
+. foreach name in A B C D {
+  2.     estimates use "`source'/`name'.ster"
+  3.     local N=e(N)
+  4.     local ll=e(ll)
+  5.     if "`name'"=="A" test meanpd5_post
+  6.     if "`name'"=="B" test pri5_post
+  7.     if "`name'"=="C" test meanpd5_post pri5_post
+  8.     if "`name'"=="D" test meanpd5_post pri5_post trendpd5_post
+  9.     post `h' ("`name'") ("All political dimensions jointly zero") (r(p)) (
+> r(chi2)) (r(df)) (`N') (`ll')
+ 10.     if "`name'"=="D" {
+ 11.         test meanpd5_post pri5_post
+ 12.         post `h' ("D") ("Level and instability conditional on trend") (r(p
+> )) (r(chi2)) (r(df)) (`N') (`ll')
+ 13.         test trendpd5_post
+ 14.         post `h' ("D") ("Adding trajectory to model C") (r(p)) (r(chi2)) (
+> r(df)) (`N') (`ll')
+ 15.     }
+ 16. }
+
+ ( 1)  meanpd5_post = 0
+
+           chi2(  1) =    0.11
+         Prob > chi2 =    0.7444
+
+ ( 1)  pri5_post = 0
+
+           chi2(  1) =    1.41
+         Prob > chi2 =    0.2350
+
+ ( 1)  meanpd5_post = 0
+ ( 2)  pri5_post = 0
+
+           chi2(  2) =    1.66
+         Prob > chi2 =    0.4359
+
+ ( 1)  meanpd5_post = 0
+ ( 2)  pri5_post = 0
+ ( 3)  trendpd5_post = 0
+
+           chi2(  3) =   14.84
+         Prob > chi2 =    0.0020
+
+ ( 1)  meanpd5_post = 0
+ ( 2)  pri5_post = 0
+
+           chi2(  2) =    1.69
+         Prob > chi2 =    0.4293
+
+ ( 1)  trendpd5_post = 0
+
+           chi2(  1) =   10.53
+         Prob > chi2 =    0.0012
+
+. postclose `h'
+
+. use "维度比较/joint_tests.dta",clear
+
+. export delimited using "维度比较/joint_tests.csv",replace
+file 维度比较/joint_tests.csv saved
+
+. display "DIMENSION_COMPARISON_COMPLETE"
+DIMENSION_COMPARISON_COMPLETE
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供
+> 应重构与韧性评估\研究数据及代码\原版复验_20261105\new_checks\维度比较/run.log
+  log type:  text
+ closed on:   5 Nov 2026, 23:35:27
+-------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. tempname state
+
+. file open `state' using "run_state.csv",write text replace
+
+. file write `state' "state,run_type" _n "complete,new_checks" _n
+
+. file close `state'
+
+. display "NEW_CHECKS_PORTABLE_COMPLETE"
+NEW_CHECKS_PORTABLE_COMPLETE
+
+. 
+end of do-file

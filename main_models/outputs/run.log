@@ -1,0 +1,691 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\main_models\outputs/run.log
+  log type:  text
+ opened on:   5 Nov 2026, 23:27:56
+
+. sysdir set PLUS `"`root'/ado/"'
+
+. adopath ++ `"`root'/ado"'
+  [1]              "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\main_models/ado"
+  [2]  (BASE)      "D:\Stata\ado\base/"
+  [3]  (SITE)      "D:\Stata\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\1\ado\personal/"
+  [6]  (PLUS)      "C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\main_models/ado/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. ppmlhdfe,version
+C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\main_models/ado\ppmlhdfe.ado
+*! version 2.3.4 11jan2025
+*! Authors: Sergio Correia, Paulo Guimarães, Thomas Zylkin
+*! URL: https://github.com/sergiocorreia/ppmlhdfe
+
+Required packages installed?
+- ftools   yes; version: 2.50.0 09jan2026
+- reghdfe  yes; version: 6.14.1 08Jul2026
+
+. tempname h
+
+. postfile `h' str8 model str32 term double b double se double p long N byte converged using "outputs/coefficients.dta",replace
+(file outputs/coefficients.dta not found)
+
+. use "data/M1.dta",clear
+
+. isid ex im year
+
+. assert _N==352005
+
+. ppmlhdfe tradevalue politicaldistance_l1 ln_distance contig comlang_off colony,absorb(ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance(1
+> e-11) use_exact_solver(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (1.1132e-10)
+Iteration 1:   deviance = 7.6236e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -6.46  PS  
+Iteration 2:   deviance = 4.4003e+13  eps = 7.33e-01  iters = 4    tol = 1.0e-04  min(eta) =  -7.90   S  
+Iteration 3:   deviance = 3.3979e+13  eps = 2.95e-01  iters = 4    tol = 1.0e-04  min(eta) = -11.26   S  
+Iteration 4:   deviance = 3.0572e+13  eps = 1.11e-01  iters = 5    tol = 1.0e-04  min(eta) = -14.83   S  
+Iteration 5:   deviance = 2.9555e+13  eps = 3.44e-02  iters = 6    tol = 1.0e-04  min(eta) = -17.62   S  
+Iteration 6:   deviance = 2.9252e+13  eps = 1.03e-02  iters = 6    tol = 1.0e-04  min(eta) = -19.78   S  
+Iteration 7:   deviance = 2.9154e+13  eps = 3.38e-03  iters = 5    tol = 1.0e-04  min(eta) = -21.78   S  
+Iteration 8:   deviance = 2.9121e+13  eps = 1.13e-03  iters = 3    tol = 1.0e-04  min(eta) = -23.78   S  
+Iteration 9:   deviance = 2.9109e+13  eps = 3.85e-04  iters = 2    tol = 1.0e-04  min(eta) = -25.77   S  
+Iteration 10:  deviance = 2.9106e+13  eps = 1.31e-04  iters = 2    tol = 1.0e-04  min(eta) = -27.75   S  
+Iteration 11:  deviance = 2.9104e+13  eps = 4.43e-05  iters = 2    tol = 1.0e-04  min(eta) = -29.69   S  
+Iteration 12:  deviance = 2.9104e+13  eps = 1.46e-05  iters = 2    tol = 1.0e-05  min(eta) = -31.53   S  
+Iteration 13:  deviance = 2.9104e+13  eps = 4.65e-06  iters = 2    tol = 1.0e-05  min(eta) = -33.18   S  
+Iteration 14:  deviance = 2.9104e+13  eps = 1.44e-06  iters = 2    tol = 1.0e-06  min(eta) = -35.07   S  
+Iteration 15:  deviance = 2.9104e+13  eps = 4.29e-07  iters = 2    tol = 1.0e-06  min(eta) = -37.06   S  
+Iteration 16:  deviance = 2.9104e+13  eps = 1.23e-07  iters = 2    tol = 1.0e-07  min(eta) = -39.04   S  
+Iteration 17:  deviance = 2.9104e+13  eps = 3.31e-08  iters = 2    tol = 1.0e-07  min(eta) = -40.98   S  
+Iteration 18:  deviance = 2.9104e+13  eps = 8.27e-09  iters = 2    tol = 1.0e-08  min(eta) = -42.82   S  
+Iteration 19:  deviance = 2.9104e+13  eps = 1.91e-09  iters = 3    tol = 1.0e-09  min(eta) = -44.43   S  
+Iteration 20:  deviance = 2.9104e+13  eps = 4.10e-10  iters = 2    tol = 1.0e-09  min(eta) = -45.54   S  
+Iteration 21:  deviance = 2.9104e+13  eps = 8.34e-11  iters = 2    tol = 1.0e-10  min(eta) = -46.29   S  
+Iteration 22:  deviance = 2.9104e+13  eps = 1.68e-11  iters = 2    tol = 1.0e-12  min(eta) = -47.30   S  
+Iteration 23:  deviance = 2.9104e+13  eps = 3.27e-12  iters = 2    tol = 1.0e-12  min(eta) = -48.10   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 23 iterations and 71 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =    352,005
+Absorbing 2 HDFE groups                           Residual df     =     28,063
+Statistics robust to heteroskedasticity           Wald chi2(5)    =     430.86
+Deviance             =  2.91037e+13               Prob > chi2     =     0.0000
+Log pseudolikelihood = -1.45519e+13               Pseudo R2       =     0.8705
+
+Number of clusters (pair_id)=     28,064
+                                   (Std. err. adjusted for 28,064 clusters in pair_id)
+--------------------------------------------------------------------------------------
+                     |               Robust
+          tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------------+----------------------------------------------------------------
+politicaldistance_l1 |  -.2148783   .0862459    -2.49   0.013    -.3839171   -.0458395
+         ln_distance |  -1.446445   .0915769   -15.79   0.000    -1.625932   -1.266958
+              contig |   .2574344   .1868542     1.38   0.168    -.1087932     .623662
+         comlang_off |   .7489884   .2327262     3.22   0.001     .2928535    1.205123
+              colony |   .3942354   .2167071     1.82   0.069    -.0305026    .8189735
+               _cons |   34.04003   .7565528    44.99   0.000     32.55722    35.52285
+--------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     ex_year |      2957           0        2957     |
+     im_year |      3113          25        3088     |
+-----------------------------------------------------+
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/M1.ster",replace
+(note: file outputs/M1.ster not found)
+file outputs/M1.ster saved
+
+. foreach term in politicaldistance_l1 ln_distance contig comlang_off colony {
+  2. post `h' ("M1") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/M2.dta",clear
+
+. isid ex im year
+
+. assert _N==83563
+
+. ppmlhdfe tradevalue pd2021_post2022 distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance(1e-11) use_exact_s
+> olver(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4621e-11)
+Iteration 1:   deviance = 1.7332e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.33  PS  
+Iteration 2:   deviance = 9.0481e+12  eps = 9.16e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.63   S  
+Iteration 3:   deviance = 6.9331e+12  eps = 3.05e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.40   S  
+Iteration 4:   deviance = 6.2573e+12  eps = 1.08e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.26   S  
+Iteration 5:   deviance = 6.0282e+12  eps = 3.80e-02  iters = 8    tol = 1.0e-04  min(eta) = -16.10   S  
+Iteration 6:   deviance = 5.9479e+12  eps = 1.35e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.48   S  
+Iteration 7:   deviance = 5.9189e+12  eps = 4.89e-03  iters = 7    tol = 1.0e-04  min(eta) = -20.95   S  
+Iteration 8:   deviance = 5.9083e+12  eps = 1.80e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.87   S  
+Iteration 9:   deviance = 5.9044e+12  eps = 6.58e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.63   S  
+Iteration 10:  deviance = 5.9030e+12  eps = 2.38e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.28   S  
+Iteration 11:  deviance = 5.9025e+12  eps = 8.50e-05  iters = 4    tol = 1.0e-04  min(eta) = -31.97   S  
+Iteration 12:  deviance = 5.9023e+12  eps = 2.95e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.45   S  
+Iteration 13:  deviance = 5.9023e+12  eps = 9.67e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.28   S  
+Iteration 14:  deviance = 5.9023e+12  eps = 3.05e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.85   S  
+Iteration 15:  deviance = 5.9023e+12  eps = 8.59e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.95   S  
+Iteration 16:  deviance = 5.9023e+12  eps = 2.68e-07  iters = 31   tol = 1.0e-07  min(eta) = -45.68   S  
+Iteration 17:  deviance = 5.9023e+12  eps = 3.80e-07  iters = 29   tol = 1.0e-07  min(eta) = -47.27   S  
+Iteration 18:  deviance = 1.3564e+13  eps = 1.30e+00  iters = 10   tol = 1.0e-07  min(eta) = -62.30   S  
+Iteration 19:  deviance = 8.7207e+12  eps = 5.55e-01  iters = 6    tol = 1.0e-07  min(eta) = -62.22   S  
+Iteration 20:  deviance = 6.9391e+12  eps = 2.57e-01  iters = 10   tol = 1.0e-07  min(eta) = -62.31   S  
+Iteration 21:  deviance = 6.2837e+12  eps = 1.04e-01  iters = 4    tol = 1.0e-07  min(eta) = -61.90   S  
+Iteration 22:  deviance = 6.0426e+12  eps = 3.99e-02  iters = 4    tol = 1.0e-07  min(eta) = -61.11   S  
+Iteration 23:  deviance = 5.9539e+12  eps = 1.49e-02  iters = 4    tol = 1.0e-07  min(eta) = -60.13   S  
+Iteration 24:  deviance = 5.9213e+12  eps = 5.51e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.13   S  
+Iteration 25:  deviance = 5.9093e+12  eps = 2.03e-03  iters = 4    tol = 1.0e-07  min(eta) = -58.13   S  
+Iteration 26:  deviance = 5.9048e+12  eps = 7.48e-04  iters = 3    tol = 1.0e-07  min(eta) = -57.13   S  
+Iteration 27:  deviance = 5.9032e+12  eps = 2.75e-04  iters = 3    tol = 1.0e-07  min(eta) = -56.13   S  
+Iteration 28:  deviance = 5.9026e+12  eps = 1.01e-04  iters = 2    tol = 1.0e-07  min(eta) = -55.13   S  
+Iteration 29:  deviance = 5.9024e+12  eps = 3.73e-05  iters = 2    tol = 1.0e-07  min(eta) = -54.13   S  
+Iteration 30:  deviance = 5.9023e+12  eps = 1.37e-05  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 31:  deviance = 5.9023e+12  eps = 5.04e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 32:  deviance = 5.9023e+12  eps = 1.85e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 33:  deviance = 5.9023e+12  eps = 6.82e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 34:  deviance = 5.9023e+12  eps = 2.51e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 35:  deviance = 5.9023e+12  eps = 9.22e-08  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 36:  deviance = 5.9023e+12  eps = 3.50e-08  iters = 25   tol = 1.0e-08  min(eta) = -54.68   S  
+Iteration 37:  deviance = 5.9023e+12  eps = 1.23e-08  iters = 12   tol = 1.0e-08  min(eta) = -54.70   S  
+Iteration 38:  deviance = 5.9023e+12  eps = 4.42e-09  iters = 3    tol = 1.0e-08  min(eta) = -54.71   S  
+Iteration 39:  deviance = 5.9023e+12  eps = 1.88e-09  iters = 42   tol = 1.0e-09  min(eta) = -55.59   S  
+Iteration 40:  deviance = 5.9023e+12  eps = 5.64e-10  iters = 57   tol = 1.0e-09  min(eta) = -56.28   S  
+Iteration 41:  deviance = 5.9023e+12  eps = 1.08e-10  iters = 7    tol = 1.0e-10  min(eta) = -56.28   S  
+Iteration 42:  deviance = 5.9023e+12  eps = 1.21e-11  iters = 5    tol = 1.0e-10  min(eta) = -56.28   S  
+Iteration 43:  deviance = 5.9023e+12  eps = 2.80e-13  iters = 4    tol = 1.0e-12  min(eta) = -56.28   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 43 iterations and 403 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     83,563
+Absorbing 3 HDFE groups                           Residual df     =      4,111
+Statistics robust to heteroskedasticity           Wald chi2(2)    =       3.63
+Deviance             =  5.90227e+12               Prob > chi2     =     0.1630
+Log pseudolikelihood = -2.95113e+12               Pseudo R2       =     0.9616
+
+Number of clusters (pair_id)=      4,112
+                                 (Std. err. adjusted for 4,112 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  |               Robust
+       tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+  pd2021_post2022 |  -.1250429   .1179829    -1.06   0.289     -.356285    .1061993
+distance_post2022 |   .2124877   .1134503     1.87   0.061    -.0098707    .4348461
+            _cons |   22.20933   .1459461   152.17   0.000     21.92328    22.49538
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4112        4112           0    *|
+     ex_year |      2944           1        2943     |
+     im_year |      3083          25        3058     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/M2.ster",replace
+(note: file outputs/M2.ster not found)
+file outputs/M2.ster saved
+
+. foreach term in pd2021_post2022 distance_post2022 {
+  2. post `h' ("M2") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/M3.dta",clear
+
+. isid ex im year
+
+. assert _N==82760
+
+. ppmlhdfe tradevalue politicaldistance_l1 pdl1_post2022 distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance
+> (1e-11) use_exact_solver(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4379e-11)
+Iteration 1:   deviance = 1.7106e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.31  PS  
+Iteration 2:   deviance = 8.8874e+12  eps = 9.25e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.68   S  
+Iteration 3:   deviance = 6.7756e+12  eps = 3.12e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.48   S  
+Iteration 4:   deviance = 6.0999e+12  eps = 1.11e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.27   S  
+Iteration 5:   deviance = 5.8711e+12  eps = 3.90e-02  iters = 8    tol = 1.0e-04  min(eta) = -15.89   S  
+Iteration 6:   deviance = 5.7910e+12  eps = 1.38e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.26   S  
+Iteration 7:   deviance = 5.7621e+12  eps = 5.02e-03  iters = 7    tol = 1.0e-04  min(eta) = -20.87   S  
+Iteration 8:   deviance = 5.7515e+12  eps = 1.85e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.78   S  
+Iteration 9:   deviance = 5.7476e+12  eps = 6.76e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.68   S  
+Iteration 10:  deviance = 5.7462e+12  eps = 2.44e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.56   S  
+Iteration 11:  deviance = 5.7457e+12  eps = 8.71e-05  iters = 4    tol = 1.0e-04  min(eta) = -32.28   S  
+Iteration 12:  deviance = 5.7455e+12  eps = 3.02e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.70   S  
+Iteration 13:  deviance = 5.7454e+12  eps = 9.88e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.30   S  
+Iteration 14:  deviance = 5.7454e+12  eps = 3.09e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.87   S  
+Iteration 15:  deviance = 5.7454e+12  eps = 8.71e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.97   S  
+Iteration 16:  deviance = 5.7454e+12  eps = 1.03e-07  iters = 30   tol = 1.0e-07  min(eta) = -44.47   S  
+Iteration 17:  deviance = 5.7454e+12  eps = 1.47e-07  iters = 31   tol = 1.0e-07  min(eta) = -47.25   S  
+Iteration 18:  deviance = 9.9955e+12  eps = 7.40e-01  iters = 10   tol = 1.0e-07  min(eta) = -61.50   S  
+Iteration 19:  deviance = 7.3089e+12  eps = 3.68e-01  iters = 9    tol = 1.0e-07  min(eta) = -61.72   S  
+Iteration 20:  deviance = 6.3206e+12  eps = 1.56e-01  iters = 6    tol = 1.0e-07  min(eta) = -61.83   S  
+Iteration 21:  deviance = 5.9570e+12  eps = 6.10e-02  iters = 4    tol = 1.0e-07  min(eta) = -61.44   S  
+Iteration 22:  deviance = 5.8233e+12  eps = 2.30e-02  iters = 4    tol = 1.0e-07  min(eta) = -60.65   S  
+Iteration 23:  deviance = 5.7741e+12  eps = 8.52e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.68   S  
+Iteration 24:  deviance = 5.7560e+12  eps = 3.14e-03  iters = 3    tol = 1.0e-07  min(eta) = -58.68   S  
+Iteration 25:  deviance = 5.7493e+12  eps = 1.16e-03  iters = 3    tol = 1.0e-07  min(eta) = -57.69   S  
+Iteration 26:  deviance = 5.7468e+12  eps = 4.26e-04  iters = 2    tol = 1.0e-07  min(eta) = -56.69   S  
+Iteration 27:  deviance = 5.7459e+12  eps = 1.57e-04  iters = 2    tol = 1.0e-07  min(eta) = -55.71   S  
+Iteration 28:  deviance = 5.7456e+12  eps = 5.77e-05  iters = 2    tol = 1.0e-07  min(eta) = -54.71   S  
+Iteration 29:  deviance = 5.7455e+12  eps = 2.12e-05  iters = 2    tol = 1.0e-07  min(eta) = -53.74   S  
+Iteration 30:  deviance = 5.7454e+12  eps = 7.81e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.57   S  
+Iteration 31:  deviance = 5.7454e+12  eps = 2.87e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.58   S  
+Iteration 32:  deviance = 5.7454e+12  eps = 1.06e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.58   S  
+Iteration 33:  deviance = 5.7454e+12  eps = 3.89e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.58   S  
+Iteration 34:  deviance = 5.7454e+12  eps = 1.43e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.59   S  
+Iteration 35:  deviance = 5.7454e+12  eps = 5.25e-08  iters = 2    tol = 1.0e-07  min(eta) = -53.59   S  
+Iteration 36:  deviance = 5.7454e+12  eps = 2.05e-08  iters = 24   tol = 1.0e-08  min(eta) = -54.55   S  
+Iteration 37:  deviance = 5.7454e+12  eps = 6.96e-09  iters = 10   tol = 1.0e-08  min(eta) = -54.56   S  
+Iteration 38:  deviance = 5.7454e+12  eps = 2.86e-09  iters = 62   tol = 1.0e-09  min(eta) = -55.46   S  
+Iteration 39:  deviance = 5.7454e+12  eps = 9.16e-10  iters = 35   tol = 1.0e-09  min(eta) = -56.20   S  
+Iteration 40:  deviance = 5.7454e+12  eps = 2.14e-10  iters = 8    tol = 1.0e-10  min(eta) = -56.20   S  
+Iteration 41:  deviance = 5.7454e+12  eps = 3.48e-11  iters = 5    tol = 1.0e-10  min(eta) = -56.20   S  
+Iteration 42:  deviance = 5.7454e+12  eps = 1.78e-12  iters = 4    tol = 1.0e-12  min(eta) = -56.20   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 42 iterations and 392 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     82,760
+Absorbing 3 HDFE groups                           Residual df     =      4,099
+Statistics robust to heteroskedasticity           Wald chi2(3)    =      17.19
+Deviance             =  5.74542e+12               Prob > chi2     =     0.0006
+Log pseudolikelihood = -2.87271e+12               Pseudo R2       =     0.9625
+
+Number of clusters (pair_id)=      4,100
+                                    (Std. err. adjusted for 4,100 clusters in pair_id)
+--------------------------------------------------------------------------------------
+                     |               Robust
+          tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+---------------------+----------------------------------------------------------------
+politicaldistance_l1 |  -.5456327   .1572251    -3.47   0.001    -.8537881   -.2374773
+       pdl1_post2022 |  -.1685356   .0783077    -2.15   0.031    -.3220159   -.0150553
+   distance_post2022 |    .215517   .1061068     2.03   0.042     .0075516    .4234824
+               _cons |   22.88727   .2306591    99.23   0.000     22.43518    23.33935
+--------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4100        4100           0    *|
+     ex_year |      2925           1        2924     |
+     im_year |      3072          25        3047     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/M3.ster",replace
+(note: file outputs/M3.ster not found)
+file outputs/M3.ster saved
+
+. foreach term in politicaldistance_l1 pdl1_post2022 distance_post2022 {
+  2. post `h' ("M3") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/ABCD.dta",clear
+
+. isid ex im year
+
+. assert _N==83563
+
+. ppmlhdfe tradevalue meanpd5_post distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance(1e-11) use_exact_solv
+> er(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4621e-11)
+Iteration 1:   deviance = 1.7355e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.33  PS  
+Iteration 2:   deviance = 9.0590e+12  eps = 9.16e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.61   S  
+Iteration 3:   deviance = 6.9392e+12  eps = 3.05e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.37   S  
+Iteration 4:   deviance = 6.2622e+12  eps = 1.08e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.33   S  
+Iteration 5:   deviance = 6.0328e+12  eps = 3.80e-02  iters = 8    tol = 1.0e-04  min(eta) = -16.17   S  
+Iteration 6:   deviance = 5.9524e+12  eps = 1.35e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.56   S  
+Iteration 7:   deviance = 5.9234e+12  eps = 4.89e-03  iters = 7    tol = 1.0e-04  min(eta) = -20.96   S  
+Iteration 8:   deviance = 5.9128e+12  eps = 1.80e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.88   S  
+Iteration 9:   deviance = 5.9089e+12  eps = 6.58e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.64   S  
+Iteration 10:  deviance = 5.9075e+12  eps = 2.38e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.36   S  
+Iteration 11:  deviance = 5.9070e+12  eps = 8.50e-05  iters = 4    tol = 1.0e-04  min(eta) = -32.05   S  
+Iteration 12:  deviance = 5.9068e+12  eps = 2.95e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.45   S  
+Iteration 13:  deviance = 5.9068e+12  eps = 9.68e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.28   S  
+Iteration 14:  deviance = 5.9068e+12  eps = 3.05e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.85   S  
+Iteration 15:  deviance = 5.9067e+12  eps = 8.60e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.95   S  
+Iteration 16:  deviance = 5.9068e+12  eps = 2.61e-07  iters = 31   tol = 1.0e-07  min(eta) = -45.59   S  
+Iteration 17:  deviance = 5.9067e+12  eps = 3.75e-07  iters = 29   tol = 1.0e-07  min(eta) = -47.27   S  
+Iteration 18:  deviance = 9.5178e+12  eps = 6.11e-01  iters = 10   tol = 1.0e-07  min(eta) = -61.59   S  
+Iteration 19:  deviance = 7.2352e+12  eps = 3.15e-01  iters = 6    tol = 1.0e-07  min(eta) = -61.50   S  
+Iteration 20:  deviance = 6.3955e+12  eps = 1.31e-01  iters = 10   tol = 1.0e-07  min(eta) = -61.62   S  
+Iteration 21:  deviance = 6.0865e+12  eps = 5.08e-02  iters = 4    tol = 1.0e-07  min(eta) = -61.22   S  
+Iteration 22:  deviance = 5.9729e+12  eps = 1.90e-02  iters = 4    tol = 1.0e-07  min(eta) = -60.42   S  
+Iteration 23:  deviance = 5.9311e+12  eps = 7.05e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.44   S  
+Iteration 24:  deviance = 5.9157e+12  eps = 2.60e-03  iters = 4    tol = 1.0e-07  min(eta) = -58.44   S  
+Iteration 25:  deviance = 5.9100e+12  eps = 9.57e-04  iters = 4    tol = 1.0e-07  min(eta) = -57.44   S  
+Iteration 26:  deviance = 5.9080e+12  eps = 3.52e-04  iters = 3    tol = 1.0e-07  min(eta) = -56.44   S  
+Iteration 27:  deviance = 5.9072e+12  eps = 1.30e-04  iters = 3    tol = 1.0e-07  min(eta) = -55.44   S  
+Iteration 28:  deviance = 5.9069e+12  eps = 4.77e-05  iters = 2    tol = 1.0e-07  min(eta) = -54.44   S  
+Iteration 29:  deviance = 5.9068e+12  eps = 1.75e-05  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 30:  deviance = 5.9068e+12  eps = 6.45e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 31:  deviance = 5.9068e+12  eps = 2.37e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 32:  deviance = 5.9068e+12  eps = 8.73e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 33:  deviance = 5.9067e+12  eps = 3.21e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 34:  deviance = 5.9067e+12  eps = 1.18e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 35:  deviance = 5.9067e+12  eps = 4.34e-08  iters = 4    tol = 1.0e-07  min(eta) = -53.75   S  
+Iteration 36:  deviance = 5.9067e+12  eps = 1.70e-08  iters = 24   tol = 1.0e-08  min(eta) = -54.69   S  
+Iteration 37:  deviance = 5.9067e+12  eps = 5.72e-09  iters = 10   tol = 1.0e-08  min(eta) = -54.71   S  
+Iteration 38:  deviance = 5.9067e+12  eps = 2.35e-09  iters = 39   tol = 1.0e-09  min(eta) = -55.59   S  
+Iteration 39:  deviance = 5.9067e+12  eps = 6.38e-10  iters = 8    tol = 1.0e-09  min(eta) = -55.59   S  
+Iteration 40:  deviance = 5.9067e+12  eps = 1.63e-10  iters = 11   tol = 1.0e-10  min(eta) = -55.59   S  
+Iteration 41:  deviance = 5.9067e+12  eps = 2.36e-11  iters = 11   tol = 1.0e-10  min(eta) = -55.59   S  
+Iteration 42:  deviance = 5.9067e+12  eps = 9.36e-13  iters = 4    tol = 1.0e-12  min(eta) = -55.60   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 42 iterations and 357 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     83,563
+Absorbing 3 HDFE groups                           Residual df     =      4,111
+Statistics robust to heteroskedasticity           Wald chi2(2)    =       3.81
+Deviance             =  5.90675e+12               Prob > chi2     =     0.1489
+Log pseudolikelihood = -2.95337e+12               Pseudo R2       =     0.9616
+
+Number of clusters (pair_id)=      4,112
+                                 (Std. err. adjusted for 4,112 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  |               Robust
+       tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |   -.037318   .1144468    -0.33   0.744    -.2616297    .1869936
+distance_post2022 |   .1905375   .1131679     1.68   0.092    -.0312674    .4123425
+            _cons |   22.22678   .1465143   151.70   0.000     21.93962    22.51394
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4112        4112           0    *|
+     ex_year |      2944           1        2943     |
+     im_year |      3083          25        3058     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/A.ster",replace
+(note: file outputs/A.ster not found)
+file outputs/A.ster saved
+
+. foreach term in meanpd5_post distance_post2022 {
+  2. post `h' ("A") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/ABCD.dta",clear
+
+. isid ex im year
+
+. assert _N==83563
+
+. ppmlhdfe tradevalue pri5_post distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance(1e-11) use_exact_solver(
+> 1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4621e-11)
+Iteration 1:   deviance = 1.7406e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.34  PS  
+Iteration 2:   deviance = 9.0710e+12  eps = 9.19e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.56   S  
+Iteration 3:   deviance = 6.9384e+12  eps = 3.07e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.34   S  
+Iteration 4:   deviance = 6.2595e+12  eps = 1.08e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.34   S  
+Iteration 5:   deviance = 6.0298e+12  eps = 3.81e-02  iters = 8    tol = 1.0e-04  min(eta) = -16.19   S  
+Iteration 6:   deviance = 5.9493e+12  eps = 1.35e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.58   S  
+Iteration 7:   deviance = 5.9203e+12  eps = 4.90e-03  iters = 7    tol = 1.0e-04  min(eta) = -20.97   S  
+Iteration 8:   deviance = 5.9097e+12  eps = 1.80e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.89   S  
+Iteration 9:   deviance = 5.9058e+12  eps = 6.59e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.65   S  
+Iteration 10:  deviance = 5.9044e+12  eps = 2.38e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.32   S  
+Iteration 11:  deviance = 5.9039e+12  eps = 8.51e-05  iters = 4    tol = 1.0e-04  min(eta) = -32.01   S  
+Iteration 12:  deviance = 5.9037e+12  eps = 2.96e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.43   S  
+Iteration 13:  deviance = 5.9037e+12  eps = 9.69e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.25   S  
+Iteration 14:  deviance = 5.9036e+12  eps = 3.05e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.83   S  
+Iteration 15:  deviance = 5.9036e+12  eps = 8.60e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.93   S  
+Iteration 16:  deviance = 5.9036e+12  eps = 3.90e-07  iters = 31   tol = 1.0e-07  min(eta) = -45.80   S  
+Iteration 17:  deviance = 5.9036e+12  eps = 4.57e-07  iters = 29   tol = 1.0e-07  min(eta) = -47.37   S  
+Iteration 18:  deviance = 7.3247e+12  eps = 2.41e-01  iters = 10   tol = 1.0e-07  min(eta) = -60.80   S  
+Iteration 19:  deviance = 6.4264e+12  eps = 1.40e-01  iters = 6    tol = 1.0e-07  min(eta) = -60.72   S  
+Iteration 20:  deviance = 6.0959e+12  eps = 5.42e-02  iters = 10   tol = 1.0e-07  min(eta) = -60.85   S  
+Iteration 21:  deviance = 5.9744e+12  eps = 2.03e-02  iters = 4    tol = 1.0e-07  min(eta) = -60.45   S  
+Iteration 22:  deviance = 5.9297e+12  eps = 7.54e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.65   S  
+Iteration 23:  deviance = 5.9132e+12  eps = 2.78e-03  iters = 4    tol = 1.0e-07  min(eta) = -58.68   S  
+Iteration 24:  deviance = 5.9072e+12  eps = 1.02e-03  iters = 4    tol = 1.0e-07  min(eta) = -57.68   S  
+Iteration 25:  deviance = 5.9049e+12  eps = 3.77e-04  iters = 4    tol = 1.0e-07  min(eta) = -56.68   S  
+Iteration 26:  deviance = 5.9041e+12  eps = 1.39e-04  iters = 3    tol = 1.0e-07  min(eta) = -55.68   S  
+Iteration 27:  deviance = 5.9038e+12  eps = 5.10e-05  iters = 3    tol = 1.0e-07  min(eta) = -54.68   S  
+Iteration 28:  deviance = 5.9037e+12  eps = 1.88e-05  iters = 2    tol = 1.0e-07  min(eta) = -53.72   S  
+Iteration 29:  deviance = 5.9037e+12  eps = 6.91e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 30:  deviance = 5.9036e+12  eps = 2.54e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 31:  deviance = 5.9036e+12  eps = 9.35e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.74   S  
+Iteration 32:  deviance = 5.9036e+12  eps = 3.44e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.74   S  
+Iteration 33:  deviance = 5.9036e+12  eps = 1.26e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.75   S  
+Iteration 34:  deviance = 5.9036e+12  eps = 4.64e-08  iters = 2    tol = 1.0e-07  min(eta) = -53.75   S  
+Iteration 35:  deviance = 5.9036e+12  eps = 1.81e-08  iters = 26   tol = 1.0e-08  min(eta) = -54.69   S  
+Iteration 36:  deviance = 5.9036e+12  eps = 6.14e-09  iters = 10   tol = 1.0e-08  min(eta) = -54.71   S  
+Iteration 37:  deviance = 5.9036e+12  eps = 2.51e-09  iters = 48   tol = 1.0e-09  min(eta) = -55.59   S  
+Iteration 38:  deviance = 5.9036e+12  eps = 7.90e-10  iters = 61   tol = 1.0e-09  min(eta) = -56.28   S  
+Iteration 39:  deviance = 5.9036e+12  eps = 1.80e-10  iters = 8    tol = 1.0e-10  min(eta) = -56.28   S  
+Iteration 40:  deviance = 5.9036e+12  eps = 2.72e-11  iters = 5    tol = 1.0e-10  min(eta) = -56.28   S  
+Iteration 41:  deviance = 5.9036e+12  eps = 1.18e-12  iters = 4    tol = 1.0e-12  min(eta) = -56.28   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 41 iterations and 408 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     83,563
+Absorbing 3 HDFE groups                           Residual df     =      4,111
+Statistics robust to heteroskedasticity           Wald chi2(2)    =       5.10
+Deviance             =  5.90363e+12               Prob > chi2     =     0.0779
+Log pseudolikelihood = -2.95181e+12               Pseudo R2       =     0.9616
+
+Number of clusters (pair_id)=      4,112
+                                 (Std. err. adjusted for 4,112 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  |               Robust
+       tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+        pri5_post |   1.183919   .9970215     1.19   0.235    -.7702071    3.138045
+distance_post2022 |   .1694957   .0963886     1.76   0.079    -.0194225     .358414
+            _cons |   22.22969   .1330288   167.10   0.000     21.96896    22.49042
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4112        4112           0    *|
+     ex_year |      2944           1        2943     |
+     im_year |      3083          25        3058     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/B.ster",replace
+(note: file outputs/B.ster not found)
+file outputs/B.ster saved
+
+. foreach term in pri5_post distance_post2022 {
+  2. post `h' ("B") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/ABCD.dta",clear
+
+. isid ex im year
+
+. assert _N==83563
+
+. ppmlhdfe tradevalue meanpd5_post pri5_post distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) tolerance(1e-11) use_
+> exact_solver(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4621e-11)
+Iteration 1:   deviance = 1.7351e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.34  PS  
+Iteration 2:   deviance = 9.0554e+12  eps = 9.16e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.62   S  
+Iteration 3:   deviance = 6.9354e+12  eps = 3.06e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.39   S  
+Iteration 4:   deviance = 6.2584e+12  eps = 1.08e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.33   S  
+Iteration 5:   deviance = 6.0290e+12  eps = 3.80e-02  iters = 8    tol = 1.0e-04  min(eta) = -16.18   S  
+Iteration 6:   deviance = 5.9486e+12  eps = 1.35e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.56   S  
+Iteration 7:   deviance = 5.9197e+12  eps = 4.89e-03  iters = 7    tol = 1.0e-04  min(eta) = -20.97   S  
+Iteration 8:   deviance = 5.9090e+12  eps = 1.80e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.89   S  
+Iteration 9:   deviance = 5.9051e+12  eps = 6.58e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.65   S  
+Iteration 10:  deviance = 5.9037e+12  eps = 2.38e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.29   S  
+Iteration 11:  deviance = 5.9032e+12  eps = 8.51e-05  iters = 4    tol = 1.0e-04  min(eta) = -31.97   S  
+Iteration 12:  deviance = 5.9031e+12  eps = 2.95e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.43   S  
+Iteration 13:  deviance = 5.9030e+12  eps = 9.68e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.25   S  
+Iteration 14:  deviance = 5.9030e+12  eps = 3.05e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.83   S  
+Iteration 15:  deviance = 5.9030e+12  eps = 8.60e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.93   S  
+Iteration 16:  deviance = 5.9030e+12  eps = 2.60e-07  iters = 31   tol = 1.0e-07  min(eta) = -45.59   S  
+Iteration 17:  deviance = 5.9030e+12  eps = 3.75e-07  iters = 29   tol = 1.0e-07  min(eta) = -47.27   S  
+Iteration 18:  deviance = 9.3233e+12  eps = 5.79e-01  iters = 10   tol = 1.0e-07  min(eta) = -61.66   S  
+Iteration 19:  deviance = 7.1613e+12  eps = 3.02e-01  iters = 6    tol = 1.0e-07  min(eta) = -61.58   S  
+Iteration 20:  deviance = 6.3659e+12  eps = 1.25e-01  iters = 10   tol = 1.0e-07  min(eta) = -61.68   S  
+Iteration 21:  deviance = 6.0733e+12  eps = 4.82e-02  iters = 5    tol = 1.0e-07  min(eta) = -61.28   S  
+Iteration 22:  deviance = 5.9656e+12  eps = 1.80e-02  iters = 4    tol = 1.0e-07  min(eta) = -60.49   S  
+Iteration 23:  deviance = 5.9260e+12  eps = 6.68e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.51   S  
+Iteration 24:  deviance = 5.9114e+12  eps = 2.46e-03  iters = 4    tol = 1.0e-07  min(eta) = -58.51   S  
+Iteration 25:  deviance = 5.9061e+12  eps = 9.07e-04  iters = 4    tol = 1.0e-07  min(eta) = -57.51   S  
+Iteration 26:  deviance = 5.9041e+12  eps = 3.34e-04  iters = 3    tol = 1.0e-07  min(eta) = -56.51   S  
+Iteration 27:  deviance = 5.9034e+12  eps = 1.23e-04  iters = 3    tol = 1.0e-07  min(eta) = -55.51   S  
+Iteration 28:  deviance = 5.9031e+12  eps = 4.52e-05  iters = 2    tol = 1.0e-07  min(eta) = -54.51   S  
+Iteration 29:  deviance = 5.9030e+12  eps = 1.66e-05  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 30:  deviance = 5.9030e+12  eps = 6.12e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 31:  deviance = 5.9030e+12  eps = 2.25e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 32:  deviance = 5.9030e+12  eps = 8.28e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.73   S  
+Iteration 33:  deviance = 5.9030e+12  eps = 3.04e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.74   S  
+Iteration 34:  deviance = 5.9030e+12  eps = 1.12e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.74   S  
+Iteration 35:  deviance = 5.9030e+12  eps = 4.11e-08  iters = 4    tol = 1.0e-07  min(eta) = -53.76   S  
+Iteration 36:  deviance = 5.9030e+12  eps = 1.61e-08  iters = 23   tol = 1.0e-08  min(eta) = -54.70   S  
+Iteration 37:  deviance = 5.9030e+12  eps = 5.41e-09  iters = 10   tol = 1.0e-08  min(eta) = -54.71   S  
+Iteration 38:  deviance = 5.9030e+12  eps = 2.24e-09  iters = 47   tol = 1.0e-09  min(eta) = -55.60   S  
+Iteration 39:  deviance = 5.9030e+12  eps = 5.98e-10  iters = 8    tol = 1.0e-09  min(eta) = -55.60   S  
+Iteration 40:  deviance = 5.9030e+12  eps = 2.33e-10  iters = 73   tol = 1.0e-10  min(eta) = -56.17   S  
+Iteration 41:  deviance = 5.9030e+12  eps = 2.02e-11  iters = 6    tol = 1.0e-10  min(eta) = -56.17   S  
+Iteration 42:  deviance = 5.9030e+12  eps = 7.02e-13  iters = 4    tol = 1.0e-12  min(eta) = -56.17   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 42 iterations and 422 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     83,563
+Absorbing 3 HDFE groups                           Residual df     =      4,111
+Statistics robust to heteroskedasticity           Wald chi2(3)    =       5.25
+Deviance             =  5.90297e+12               Prob > chi2     =     0.1541
+Log pseudolikelihood = -2.95148e+12               Pseudo R2       =     0.9616
+
+Number of clusters (pair_id)=      4,112
+                                 (Std. err. adjusted for 4,112 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  |               Robust
+       tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |  -.0461843   .1157044    -0.40   0.690    -.2729609    .1805922
+        pri5_post |   1.225126   .9908346     1.24   0.216    -.7168744    3.167126
+distance_post2022 |   .1827309   .1137275     1.61   0.108    -.0401709    .4056326
+            _cons |   22.21783   .1470493   151.09   0.000     21.92962    22.50605
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4112        4112           0    *|
+     ex_year |      2944           1        2943     |
+     im_year |      3083          25        3058     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/C.ster",replace
+(note: file outputs/C.ster not found)
+file outputs/C.ster saved
+
+. foreach term in meanpd5_post pri5_post distance_post2022 {
+  2. post `h' ("C") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. use "data/ABCD.dta",clear
+
+. isid ex im year
+
+. assert _N==83563
+
+. ppmlhdfe tradevalue meanpd5_post pri5_post trendpd5_post distance_post2022,absorb(pair_id ex_year im_year) vce(cluster pair_id) separation(fe simplex) toleran
+> ce(1e-11) use_exact_solver(1) maxiter(500)
+warning: dependent variable takes very low values after standardizing (5.4621e-11)
+Iteration 1:   deviance = 1.7198e+13  eps = .         iters = 7    tol = 1.0e-04  min(eta) =  -5.34  PS  
+Iteration 2:   deviance = 8.9279e+12  eps = 9.26e-01  iters = 7    tol = 1.0e-04  min(eta) =  -7.61   S  
+Iteration 3:   deviance = 6.7974e+12  eps = 3.13e-01  iters = 7    tol = 1.0e-04  min(eta) = -10.55   S  
+Iteration 4:   deviance = 6.1132e+12  eps = 1.12e-01  iters = 8    tol = 1.0e-04  min(eta) = -13.60   S  
+Iteration 5:   deviance = 5.8821e+12  eps = 3.93e-02  iters = 8    tol = 1.0e-04  min(eta) = -16.49   S  
+Iteration 6:   deviance = 5.8014e+12  eps = 1.39e-02  iters = 8    tol = 1.0e-04  min(eta) = -18.90   S  
+Iteration 7:   deviance = 5.7723e+12  eps = 5.04e-03  iters = 7    tol = 1.0e-04  min(eta) = -21.06   S  
+Iteration 8:   deviance = 5.7617e+12  eps = 1.85e-03  iters = 6    tol = 1.0e-04  min(eta) = -23.97   S  
+Iteration 9:   deviance = 5.7578e+12  eps = 6.77e-04  iters = 5    tol = 1.0e-04  min(eta) = -26.73   S  
+Iteration 10:  deviance = 5.7563e+12  eps = 2.45e-04  iters = 4    tol = 1.0e-04  min(eta) = -29.49   S  
+Iteration 11:  deviance = 5.7558e+12  eps = 8.75e-05  iters = 4    tol = 1.0e-04  min(eta) = -32.19   S  
+Iteration 12:  deviance = 5.7557e+12  eps = 3.04e-05  iters = 10   tol = 1.0e-05  min(eta) = -34.58   S  
+Iteration 13:  deviance = 5.7556e+12  eps = 9.95e-06  iters = 8    tol = 1.0e-05  min(eta) = -37.00   S  
+Iteration 14:  deviance = 5.7556e+12  eps = 3.14e-06  iters = 17   tol = 1.0e-06  min(eta) = -39.58   S  
+Iteration 15:  deviance = 5.7556e+12  eps = 8.85e-07  iters = 14   tol = 1.0e-06  min(eta) = -41.85   S  
+Iteration 16:  deviance = 5.7556e+12  eps = 1.35e-06  iters = 31   tol = 1.0e-07  min(eta) = -47.11   S  
+Iteration 17:  deviance = 5.7556e+12  eps = 1.07e-06  iters = 29   tol = 1.0e-07  min(eta) = -48.68   S  
+Iteration 18:  deviance = 6.2123e+12  eps = 7.94e-02  iters = 10   tol = 1.0e-07  min(eta) = -59.85   S  
+Iteration 19:  deviance = 5.9236e+12  eps = 4.87e-02  iters = 9    tol = 1.0e-07  min(eta) = -59.79   S  
+Iteration 20:  deviance = 5.8174e+12  eps = 1.83e-02  iters = 5    tol = 1.0e-07  min(eta) = -59.58   S  
+Iteration 21:  deviance = 5.7783e+12  eps = 6.76e-03  iters = 4    tol = 1.0e-07  min(eta) = -59.12   S  
+Iteration 22:  deviance = 5.7639e+12  eps = 2.49e-03  iters = 3    tol = 1.0e-07  min(eta) = -58.32   S  
+Iteration 23:  deviance = 5.7587e+12  eps = 9.18e-04  iters = 4    tol = 1.0e-07  min(eta) = -57.36   S  
+Iteration 24:  deviance = 5.7567e+12  eps = 3.38e-04  iters = 4    tol = 1.0e-07  min(eta) = -56.36   S  
+Iteration 25:  deviance = 5.7560e+12  eps = 1.24e-04  iters = 4    tol = 1.0e-07  min(eta) = -55.37   S  
+Iteration 26:  deviance = 5.7557e+12  eps = 4.57e-05  iters = 4    tol = 1.0e-07  min(eta) = -54.38   S  
+Iteration 27:  deviance = 5.7556e+12  eps = 1.68e-05  iters = 3    tol = 1.0e-07  min(eta) = -53.50   S  
+Iteration 28:  deviance = 5.7556e+12  eps = 6.19e-06  iters = 3    tol = 1.0e-07  min(eta) = -53.50   S  
+Iteration 29:  deviance = 5.7556e+12  eps = 2.28e-06  iters = 2    tol = 1.0e-07  min(eta) = -53.50   S  
+Iteration 30:  deviance = 5.7556e+12  eps = 8.38e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.51   S  
+Iteration 31:  deviance = 5.7556e+12  eps = 3.08e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.51   S  
+Iteration 32:  deviance = 5.7556e+12  eps = 1.13e-07  iters = 2    tol = 1.0e-07  min(eta) = -53.51   S  
+Iteration 33:  deviance = 5.7556e+12  eps = 4.15e-08  iters = 2    tol = 1.0e-07  min(eta) = -53.52   S  
+Iteration 34:  deviance = 5.7556e+12  eps = 1.67e-08  iters = 17   tol = 1.0e-08  min(eta) = -54.47   S  
+Iteration 35:  deviance = 5.7556e+12  eps = 5.49e-09  iters = 9    tol = 1.0e-08  min(eta) = -54.48   S  
+Iteration 36:  deviance = 5.7556e+12  eps = 2.39e-09  iters = 42   tol = 1.0e-09  min(eta) = -55.39   S  
+Iteration 37:  deviance = 5.7556e+12  eps = 7.38e-10  iters = 41   tol = 1.0e-09  min(eta) = -56.12   S  
+Iteration 38:  deviance = 5.7556e+12  eps = 1.52e-10  iters = 35   tol = 1.0e-10  min(eta) = -56.14   S  
+Iteration 39:  deviance = 5.7556e+12  eps = 2.01e-11  iters = 5    tol = 1.0e-10  min(eta) = -56.14   S  
+Iteration 40:  deviance = 5.7556e+12  eps = 6.77e-13  iters = 4    tol = 1.0e-12  min(eta) = -56.14   S O
+------------------------------------------------------------------------------------------------------------
+(legend: p: exact partial-out   s: exact solver   h: step-halving   o: epsilon below tolerance)
+Converged in 40 iterations and 396 HDFE sub-iterations (tol = 1.0e-11)
+
+HDFE PPML regression                              No. of obs      =     83,563
+Absorbing 3 HDFE groups                           Residual df     =      4,111
+Statistics robust to heteroskedasticity           Wald chi2(4)    =      15.43
+Deviance             =  5.75558e+12               Prob > chi2     =     0.0039
+Log pseudolikelihood = -2.87779e+12               Pseudo R2       =     0.9626
+
+Number of clusters (pair_id)=      4,112
+                                 (Std. err. adjusted for 4,112 clusters in pair_id)
+-----------------------------------------------------------------------------------
+                  |               Robust
+       tradevalue | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+     meanpd5_post |  -.0097422   .1023113    -0.10   0.924    -.2102687    .1907842
+        pri5_post |   1.183142    .910303     1.30   0.194    -.6010187    2.967303
+    trendpd5_post |  -7.617555   2.348013    -3.24   0.001    -12.21958   -3.015533
+distance_post2022 |    .107961   .0938376     1.15   0.250    -.0759573    .2918793
+            _cons |     22.296   .1243139   179.35   0.000     22.05235    22.53965
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+     pair_id |      4112        4112           0    *|
+     ex_year |      2944           1        2943     |
+     im_year |      3083          25        3058     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. assert e(converged)==1 & e(N)==_N
+
+. assert e(sample)==1
+
+. estimates save "outputs/D.ster",replace
+(note: file outputs/D.ster not found)
+file outputs/D.ster saved
+
+. foreach term in meanpd5_post pri5_post trendpd5_post distance_post2022 {
+  2. post `h' ("D") ("`term'") (_b[`term']) (_se[`term']) (2*normal(-abs(_b[`term']/_se[`term']))) (e(N)) (e(converged))
+  3. }
+
+. postclose `h'
+
+. use "outputs/coefficients.dta",clear
+
+. export delimited using "outputs/coefficients.csv",replace
+(file outputs/coefficients.csv not found)
+file outputs/coefficients.csv saved
+
+. display "MAIN_MODELS_COMPLETE"
+MAIN_MODELS_COMPLETE
+
+. log close
+      name:  <unnamed>
+       log:  C:\Users\1\Desktop\段亚煊_毕业论文_风险冲击下全球石油贸易网络的供应重构与韧性评估\研究数据及代码\原版复验_20261105\main_models\outputs/run.log
+  log type:  text
+ closed on:   5 Nov 2026, 23:31:12
+----------------------------------------------------------------------------------------------------------------------------------------------------------------

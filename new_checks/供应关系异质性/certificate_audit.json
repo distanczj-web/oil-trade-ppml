@@ -1,0 +1,29 @@
+{
+  "model": {
+    "model": "Dependence",
+    "N": 75316,
+    "pairs": 3521,
+    "positive": 24549,
+    "objective": -0.0,
+    "max_positive_residual": 0.0,
+    "min_zero_certificate": 0.0,
+    "full_design_columns": 8869,
+    "lp_parameterized_columns": 8869,
+    "seconds": 5.890999999999622,
+    "keys_sha256": "23d472208a066135786acfded2ceca9c187d46ba42ed5654faf4be9bef4f7817"
+  },
+  "stages": [
+    {
+      "model": "Dependence",
+      "stage": "FE_pruning",
+      "removed": 509,
+      "positive_removed": 4
+    },
+    {
+      "model": "Dependence",
+      "stage": "FE_pruning",
+      "removed": 2,
+      "positive_removed": 2
+    }
+  ]
+}

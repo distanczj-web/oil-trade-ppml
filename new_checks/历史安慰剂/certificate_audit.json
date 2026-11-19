@@ -1,0 +1,126 @@
+{
+  "models": [
+    {
+      "model": "PL2015",
+      "N": 60705,
+      "pairs": 3648,
+      "positive": 20767,
+      "objective": -0.0,
+      "max_positive_residual": 0.0,
+      "min_zero_certificate": 0.0,
+      "full_design_columns": 8435,
+      "lp_parameterized_columns": 8435,
+      "seconds": 8.5,
+      "keys_sha256": "b3f3b48a8267df3e3045e23a6b4b3b20aad14f1efc24289e624191cc2e646a67",
+      "case": {
+        "name": "PL2015",
+        "political_start": 2010,
+        "political_end": 2014,
+        "shock": 2015,
+        "trade_start": 2000,
+        "trade_end": 2019
+      },
+      "candidate_N": 465709,
+      "certificate_source_sha256": "a2dcfd81439deb1dab497a3883f3ed14d51e9fdd40108b39f8db3b0250234207"
+    },
+    {
+      "model": "PL2017",
+      "N": 69741,
+      "pairs": 3840,
+      "positive": 23022,
+      "objective": -0.0,
+      "max_positive_residual": 0.0,
+      "min_zero_certificate": 0.0,
+      "full_design_columns": 9137,
+      "lp_parameterized_columns": 9137,
+      "seconds": 11.687000000001717,
+      "keys_sha256": "71c62a4bbd0f283dc81c9c0a3b6c6fc5aa44bcc1d3cf322ec955a0c39e227e6d",
+      "case": {
+        "name": "PL2017",
+        "political_start": 2012,
+        "political_end": 2016,
+        "shock": 2017,
+        "trade_start": 2000,
+        "trade_end": 2021
+      },
+      "candidate_N": 510605,
+      "certificate_source_sha256": "a2dcfd81439deb1dab497a3883f3ed14d51e9fdd40108b39f8db3b0250234207"
+    }
+  ],
+  "stages": [
+    {
+      "model": "PL2015",
+      "stage": "FE_pruning",
+      "removed": 404896,
+      "positive_removed": 8
+    },
+    {
+      "model": "PL2015",
+      "stage": "FE_pruning",
+      "removed": 64,
+      "positive_removed": 64
+    },
+    {
+      "model": "PL2015",
+      "stage": "FE_pruning",
+      "removed": 6,
+      "positive_removed": 0
+    },
+    {
+      "model": "PL2015",
+      "stage": "LP_separation",
+      "removed": 26,
+      "positive_removed": 0,
+      "objective": 26.0
+    },
+    {
+      "model": "PL2015",
+      "stage": "FE_pruning",
+      "removed": 6,
+      "positive_removed": 6
+    },
+    {
+      "model": "PL2015",
+      "stage": "FE_pruning",
+      "removed": 6,
+      "positive_removed": 0
+    },
+    {
+      "model": "PL2017",
+      "stage": "FE_pruning",
+      "removed": 440748,
+      "positive_removed": 6
+    },
+    {
+      "model": "PL2017",
+      "stage": "FE_pruning",
+      "removed": 67,
+      "positive_removed": 67
+    },
+    {
+      "model": "PL2017",
+      "stage": "FE_pruning",
+      "removed": 6,
+      "positive_removed": 0
+    },
+    {
+      "model": "PL2017",
+      "stage": "LP_separation",
+      "removed": 29,
+      "positive_removed": 0,
+      "objective": 29.0
+    },
+    {
+      "model": "PL2017",
+      "stage": "FE_pruning",
+      "removed": 6,
+      "positive_removed": 6
+    },
+    {
+      "model": "PL2017",
+      "stage": "FE_pruning",
+      "removed": 8,
+      "positive_removed": 0
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+model,comparison,p,statistic,df,N,ll
+A,All political dimensions jointly zero,.7443689498205039,.10632375,1,83563,-2953374072832
+B,All political dimensions jointly zero,.2350478242455625,1.4100516,1,83563,-2951814316032
+C,All political dimensions jointly zero,.4358984312321276,1.6606921,2,83563,-2951484538880
+D,All political dimensions jointly zero,.0019564241104605,14.842379,3,83563,-2877791141888
+D,Level and instability conditional on tre,.4293193019961785,1.6911087,2,83563,-2877791141888
+D,Adding trajectory to model C,.0011775817073915,10.525192,1,83563,-2877791141888

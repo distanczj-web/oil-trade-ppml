@@ -1,0 +1,13 @@
+{
+  "period": [
+    2017,
+    2021
+  ],
+  "primary_role_minimum_average_annual_recorded_usd": 100000000,
+  "dominance": "Use average annual flows from frozen positive import-reported bilateral trade for both directions. Compare outgoing and incoming flows. Assign ties and subthreshold flows to other.",
+  "gap_threshold_years": 3,
+  "prespecified_before_estimation": true,
+  "RoleI3": "Drop importer gaps only when import-oriented.",
+  "RoleB3": "Drop importer gaps when import-oriented or exporter gaps when export-oriented.",
+  "frozen_D_comparison": "Apply each rule to original D observations and re-certify finite support. Compare with D rebuilt from the eligible mother sample. Same eligible final support implies the same model, so no synthetic second coefficient."
+}
