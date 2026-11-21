@@ -1,0 +1,47 @@
+{
+  "positive_candidates": 37965,
+  "final_N": 36362,
+  "pairs": 1669,
+  "positive_outcomes": 19398,
+  "coefficient_max_difference": 6.306066779870889e-12,
+  "SE_max_difference": 6.612328462551886e-10,
+  "relative_margins": {
+    "pair_id": 1.0302665926575467e-15,
+    "ex_year": 2.594925382884897e-13,
+    "im_year": 1.570225431161513e-13
+  },
+  "normalised_score": 2.969275950319908e-17,
+  "unchanged_outcomes_and_regressors": true,
+  "passed": true,
+  "full_sample_zero_share_observations": 37351,
+  "full_sample_total_observations": 75316,
+  "positive_sample_percentiles_and_magnitudes": [
+    {
+      "percentile": 50,
+      "share": 0.0028624932088246848,
+      "slope": -5.81331314920989,
+      "SE": 2.323749413105942,
+      "conditional_pct": -5.64756737264708,
+      "lower_pct": -9.84842657498581,
+      "upper_pct": -1.2509576429750422
+    },
+    {
+      "percentile": 75,
+      "share": 0.03478020845257672,
+      "slope": -6.4204446562603215,
+      "SE": 2.231456144140743,
+      "conditional_pct": -6.218675276491243,
+      "lower_pct": -10.231870885968009,
+      "upper_pct": -2.0260647771322935
+    },
+    {
+      "percentile": 90,
+      "share": 0.16890494620961347,
+      "slope": -8.971734858121307,
+      "SE": 2.225122791629334,
+      "conditional_pct": -8.581045427132644,
+      "lower_pct": -12.482284819327724,
+      "upper_pct": -4.505902171430668
+    }
+  ]
+}

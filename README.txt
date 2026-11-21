@@ -1,4 +1,4 @@
-全球原油贸易 PPML 论文复现资料｜2026-11-16
+全球原油贸易 PPML 论文复现资料｜2026-11-21
 
 从冻结数据和已归档的结果起步。数据以出口国 ex、进口国 im、年份 year 为唯一键，附录模型的支持标记按这三个字段与冻结面板合并。估计使用 Stata/MP 18（脚本语法版本 17）和随包提供的程序版本；各运行脚本列明容差。严格国家对趋势使用 Python 3.12 的自定义稀疏求解程序。Python 依赖见 strict_refinement/requirements-python.txt。原始数据重新下载、投票理想点再估计和逐份原始报告再清洗不在本包范围内。
 
@@ -11,3 +11,7 @@
 7. Figure 1–2。从包根目录运行 python figures/reproduce_flow_coverage.py --mother figures/flow_inputs.dta，随后运行 python figures/reproduce_figures.py（需要 matplotlib）。前者从冻结流量汇总，后者以经核验的年度系数出图。代码及附录列表保留两图的覆盖与缩放规则。投票记录计数见论文附录 A7。
 
 建议在资料包副本中重运行，脚本会更新各自的输出文件。SHA256.json 记录发出时的各文件校验值。
+
+
+8. World 汇总与事前正贸易关系检查。先从包根目录运行 python additional_checks/audit_world_only.py，核对42个正 World 汇总但无有效双边伙伴明细的进口国—年份及其最终样本覆盖。Stata 进入 additional_checks 后执行 do run_positive_relations.do，再回包根目录运行 python additional_checks/audit_positive_relations.py。输出包括标准命令与独立 Stata/Mata 比较、最终观测键、完整协方差、日志以及正贸易关系分位数区间。该限制不重新归一化事前份额，也不替代主模型。
+9. Figure 1–2 的复现脚本同时输出 SVG 与 PNG。正式 Word 稿采用 SVG 矢量图。

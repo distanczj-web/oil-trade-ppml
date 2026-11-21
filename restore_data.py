@@ -34,7 +34,7 @@ def verify_replication_files():
             failed.append(name)
     if failed:
         raise RuntimeError('Replication file verification failed\n'+'\n'.join(failed))
-    print(f'All {len(original)} original replication files match their frozen checksums.')
+    print(f'All {len(original)} frozen replication files match their checksums.')
 
 
 def main():

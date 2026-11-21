@@ -1,0 +1,32 @@
+{
+  "raw_import_records": 30685,
+  "importer_years": 3255,
+  "strict_cases": 42,
+  "broader_no_positive_cases": 42,
+  "strict_countries": 10,
+  "strict_pre2022_cases": 38,
+  "strict_post2022_cases": 4,
+  "samples": [
+    {
+      "sample": "Initial panel",
+      "N": 710265,
+      "strict_affected_rows": 9375,
+      "strict_affected_positive": 0,
+      "strict_affected_value": 0.0,
+      "broad_affected_rows": 9375,
+      "retained_N_strict": 700890
+    },
+    {
+      "sample": "Final Model D",
+      "N": 83563,
+      "strict_affected_rows": 0,
+      "strict_affected_positive": 0,
+      "strict_affected_value": 0.0,
+      "broad_affected_rows": 0,
+      "retained_N_strict": 83563
+    }
+  ],
+  "interpretation": "Source reporting presence does not establish complete bilateral detail. This audit does not recode trade values.",
+  "baseline_same_observations": true,
+  "baseline_broader_same_observations": true
+}

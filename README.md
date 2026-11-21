@@ -38,4 +38,23 @@ After estimation, run `python main_models/audit_results.py` from the repository 
 
 The strict pair-trend results use the independently audited custom solver. The standard `ppmlhdfe` implementation has an unresolved numerical limitation for that specification, documented in the manuscript appendix. The scope and stopping criteria are recorded with the solver outputs.
 
-`SHA256.json` records the files supplied in the original replication package. Third-party software licences are retained in the relevant `licenses` directories. `restore_data.py --verify-only` checks both restored data and the original replication files. Verify the frozen package before estimation, and rerun the models in a separate working copy because the estimation scripts replace their output files. `.gitattributes` preserves the archived file bytes when cloning on different operating systems.
+`SHA256.json` records the frozen replication release, including the additional reporting and positive-pre-event checks dated 21 November 2026. Third-party software licences are retained in the relevant `licenses` directories. `restore_data.py --verify-only` checks both restored data and the original replication files. Verify the frozen package before estimation, and rerun the models in a separate working copy because the estimation scripts replace their output files. `.gitattributes` preserves the archived file bytes when cloning on different operating systems.
+
+
+## Additional reporting and prior-relationship checks
+
+The `additional_checks` module accompanies Online Appendix Tables A2b, A14a and A14b. It audits the frozen import source records before assumed-zero construction and restricts the supplier-share analysis to strictly positive recorded imports in 2017–2019. The baseline estimation data are unchanged.
+
+```text
+python additional_checks/audit_world_only.py
+```
+
+In Stata, change the working directory to `additional_checks` and run `do run_positive_relations.do`. Then return to the repository directory and run:
+
+```text
+python additional_checks/audit_positive_relations.py
+```
+
+The reporting audit identifies 42 positive-World-total importer-years without a valid bilateral partner record. Their 9,375 initial-panel assumed zeros do not enter Model D. The positive-prior-relationship sensitivity analysis has 36,362 final observations; archived standard-command and independent Stata/Mata estimates satisfy the numerical agreement checks. The restriction retains the original prior-share denominator and does not redefine the principal model.
+
+Figure reproduction now writes editable SVG as well as PNG outputs. The SVG files reproduce the frozen aggregates and annual coefficient values.

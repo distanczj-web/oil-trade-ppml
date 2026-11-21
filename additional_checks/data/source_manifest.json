@@ -1,0 +1,11 @@
+{
+  "coverage": [
+    2000,
+    2024
+  ],
+  "source_archive": "coverage_source_records.dta",
+  "source_sha256": "d5dc6ba07d736891d1df246f72d51efc1e077a36f7784d075a5d362a40f562b4",
+  "definition": "Archived importer reports before assumed-zero construction. Valid partners are non-self country partners in the frozen CEPII-based country universe.",
+  "records": 30685,
+  "csv_gzip_sha256": "fb0d3ca5a1c5a47b1b6d275b7917ad56b16e7620f2fa32d89797301500c24207"
+}

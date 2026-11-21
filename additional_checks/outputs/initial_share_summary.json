@@ -1,0 +1,15 @@
+{
+  "all_estimation_observations": 75316,
+  "positive_pre_observations": 37965,
+  "positive_pre_pairs": 1686,
+  "full_sample_percentiles": {
+    "0.5": 2.013740770489833e-10,
+    "0.75": 0.0028022304438267706,
+    "0.9": 0.058448282609684404
+  },
+  "positive_pre_percentiles": {
+    "0.5": 0.0027136655026957462,
+    "0.75": 0.034808502713612015,
+    "0.9": 0.17537994542779817
+  }
+}
